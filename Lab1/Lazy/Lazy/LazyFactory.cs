@@ -16,14 +16,14 @@ namespace Lazy
             return new Lazy<T>(supplier);
         }
 
-        //public static ThreadSafeLazy<T> CreateThreadSafeLazy(Func<T> supplier)
-        //{
-        //    if (supplier == null)
-        //    {
-        //        throw new ArgumentNullException();
-        //    }
-        //
-        //    return new ThreadSafeLazy<T>(supplier);
-        //}
+        public static ThreadSafeLazy<T> CreateThreadSafeLazy(Func<T> supplier)
+        {
+            if (supplier == null)
+            {
+                throw new ArgumentNullException();
+            }
+        
+            return new ThreadSafeLazy<T>(supplier);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Lazy
 {
@@ -10,9 +11,25 @@ namespace Lazy
 
             Func<string> supplier = () => str;
 
-            var lazyTest = LazyFactory<string>.CreateLazy(supplier);
+            ThreadSafeLazy<string> lazy = LazyFactory<string>.CreateThreadSafeLazy(supplier);
 
-            Console.WriteLine(lazyTest.Get());
+            var threadA = new Thread(() =>
+            {
+                Console.WriteLine(lazy.Get());
+            });
+
+            var threadB = new Thread(() =>
+            {
+                Console.WriteLine(lazy.Get());
+            });
+
+            threadA.Start();
+            threadB.Start();
+
+            Console.WriteLine($"Main thread: {lazy.Get()}");
+
+            threadA.Join();
+            threadB.Join();
         }
     }
 }
