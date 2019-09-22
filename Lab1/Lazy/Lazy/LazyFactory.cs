@@ -23,7 +23,7 @@ namespace Lazy
         }
 
         /// <summary>
-        /// Создание экземпляра небезопасного Lazy
+        /// Создание экземпляра безопасного Lazy
         /// </summary>
         /// <param name="supplier">Объект, предоставляющий вычисление</param>
         public static ThreadSafeLazy<T> CreateThreadSafeLazy(Func<T> supplier)
