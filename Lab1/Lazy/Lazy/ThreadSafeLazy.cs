@@ -1,15 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Lazy
 {
+    /// <summary>
+    /// Класс, реализующий интерфейс ILazy,
+    /// работающий корректно и в многопоточном режиме
+    /// </summary>
     public class ThreadSafeLazy<T> : ILazy<T>
     {
+        /// <summary>
+        /// Флаг, который говорит о том, вычислен ли результат
+        /// </summary>
         private volatile bool isCounted = false;
+        /// <summary>
+        /// Объект, предоставляющий вычисление
+        /// </summary>
         private Func<T> supplier;
+        /// <summary>
+        /// Хранящееся значение
+        /// </summary>
         private T value;
-        private object _lock = new object();
+        /// <summary>
+        /// Объект, на который будем ставить замок
+        /// </summary>
+        private object lazyLock = new object();
 
         public ThreadSafeLazy(Func<T> supplier)
         {
@@ -25,7 +39,7 @@ namespace Lazy
         {
             if (!isCounted)
             {
-                lock (_lock)
+                lock (lazyLock)
                 {
                     if (isCounted)
                     {
