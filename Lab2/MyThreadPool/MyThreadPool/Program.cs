@@ -25,11 +25,8 @@ namespace MyThreadPool
             foreach (var task in tasks)
             {
                 Console.WriteLine(task.Result);
+                Console.WriteLine(task.IsCompleted);
             }
-
-            //var newTask = task.ContinueWith(i => DateTime.Now.AddMilliseconds(10000));
-            //
-            //var newResult = newTask.Result;
         }
     }
 }

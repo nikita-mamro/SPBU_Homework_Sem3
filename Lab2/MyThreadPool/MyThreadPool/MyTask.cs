@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace MyThreadPool
@@ -21,8 +17,11 @@ namespace MyThreadPool
         {
             get
             {
-                resultWaiter.WaitOne();
-                return result;
+                lock (resultWaiter)
+                {
+                    resultWaiter.WaitOne();
+                    return result;
+                }
             }
             private set
                 => Result = value;
@@ -36,7 +35,7 @@ namespace MyThreadPool
         public void Calculate()
         {
             result = supplier();
-            
+
             lock (taskLock)
             {
                 IsCompleted = true;
