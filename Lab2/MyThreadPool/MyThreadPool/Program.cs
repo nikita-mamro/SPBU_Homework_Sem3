@@ -17,16 +17,25 @@ namespace MyThreadPool
 
             for (var i = 0; i < 15; ++i)
             {
-                tasks.Add(myThreadPool.QueueTask(() => 5 * 5));
+                tasks.Add(myThreadPool.QueueTask(Kek));
             }
 
-            myThreadPool.Shutdown();
+            //myThreadPool.Shutdown();
+
+            Thread.Sleep(15000);
 
             foreach (var task in tasks)
             {
                 Console.WriteLine(task.Result);
                 Console.WriteLine(task.IsCompleted);
             }
+        }
+
+        static int Kek()
+        {
+            Thread.Sleep(5000);
+            Console.WriteLine("Calculating task");
+            return 5 * 5;
         }
     }
 }

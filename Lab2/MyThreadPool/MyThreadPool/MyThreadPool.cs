@@ -7,7 +7,7 @@ namespace MyThreadPool
 {
     public class MyThreadPool
     {
-        private readonly int threadsCapacity;
+        //private readonly int threadsCapacity;
 
         private List<Thread> threads;
         private ConcurrentQueue<Action> taskQueue;
@@ -62,7 +62,12 @@ namespace MyThreadPool
 
             taskQueue.Enqueue(task.Calculate);
 
-            taskQueryWaiter.Set();
+            
+            lock (taskQueryWaiter)
+            {
+                taskQueryWaiter.Set();
+            }
+
             return task;
         }
     }
