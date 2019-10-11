@@ -12,14 +12,17 @@ namespace Lazy
         /// Флаг, который говорит о том, вычислен ли результат
         /// </summary>
         private volatile bool isCounted = false;
+
         /// <summary>
         /// Объект, предоставляющий вычисление
         /// </summary>
         private Func<T> supplier;
+
         /// <summary>
         /// Хранящееся значение
         /// </summary>
         private T value;
+
         /// <summary>
         /// Объект, на который будем ставить замок
         /// </summary>
@@ -47,6 +50,7 @@ namespace Lazy
                     }
 
                     value = supplier();
+                    supplier = null;
                     isCounted = true;
                 }
             }

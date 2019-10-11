@@ -12,10 +12,12 @@ namespace Lazy
         /// Флаг, который говорит о том, вычислен ли результат
         /// </summary>
         private bool isCounted = false;
+
         /// <summary>
         /// Объект, предоставляющий вычисление
         /// </summary>
         private Func<T> supplier;
+
         /// <summary>
         /// Хранящееся значение
         /// </summary>
@@ -36,6 +38,7 @@ namespace Lazy
             if (!isCounted)
             {
                 value = supplier();
+                supplier = null;
                 isCounted = true;
             }
 
