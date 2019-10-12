@@ -7,18 +7,24 @@ namespace MyThreadPool
 {
     public class MyThreadPool
     {
-        //private readonly int threadsCapacity;
+        private int currentThreads;
 
         private List<Thread> threads;
         private ConcurrentQueue<Action> taskQueue;
 
         private CancellationTokenSource cts = new CancellationTokenSource();
         private AutoResetEvent taskQueryWaiter = new AutoResetEvent(true);
+        private AutoResetEvent closeWaiter = new AutoResetEvent(true);
 
+        private Semaphore sem;
+
+        private object closeLocker = new object();
         private object locker = new object();
 
         public MyThreadPool(int numberOfThreads)
         {
+            sem = new Semaphore(numberOfThreads, numberOfThreads);
+
             threads = new List<Thread>(numberOfThreads);
             taskQueue = new ConcurrentQueue<Action>();
 
@@ -26,6 +32,7 @@ namespace MyThreadPool
             {
                 threads.Add(new Thread(() =>
                 {
+
                     while (!cts.IsCancellationRequested)
                     {
                         if (taskQueue.TryDequeue(out var task))
@@ -36,7 +43,19 @@ namespace MyThreadPool
                         {
                             taskQueryWaiter.WaitOne();
                         }
+
                     }
+
+                    //lock (closeLocker)
+                    //{
+                    //    --currentThreads;
+                    //}
+                    //
+                    //if (currentThreads == 0)
+                    //{
+                    //    closeWaiter.Set();
+                    //}
+
                 }));
 
                 threads[i].Start();
@@ -46,27 +65,29 @@ namespace MyThreadPool
         public void Shutdown()
         {
             cts.Cancel();
+            taskQueue = null;
+            
+            foreach (var thread in threads)
+            {
+                thread.Abort();
+            }
         }
 
-        public MyTask<TResult> QueueTask<TResult>(Func<TResult> supplier)
+        public IMyTask<TResult> QueueTask<TResult>(Func<TResult> supplier)
         {
             return QueueMyTask(new MyTask<TResult>(supplier));
         }
 
-        private MyTask<TResult> QueueMyTask<TResult>(MyTask<TResult> task)
+        private IMyTask<TResult> QueueMyTask<TResult>(MyTask<TResult> task)
         {
             if (cts.IsCancellationRequested)
             {
                 throw new Exception();
             }
-
+            
             taskQueue.Enqueue(task.Calculate);
 
-            
-            lock (taskQueryWaiter)
-            {
-                taskQueryWaiter.Set();
-            }
+            taskQueryWaiter.Set();
 
             return task;
         }

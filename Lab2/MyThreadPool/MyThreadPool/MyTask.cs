@@ -13,11 +13,13 @@ namespace MyThreadPool
 
         private AutoResetEvent resultWaiter = new AutoResetEvent(true);
 
+        private MyThreadPool pool;
+
         public TResult Result
         {
             get
             {
-                lock (resultWaiter)
+                lock (taskLock)
                 {
                     resultWaiter.WaitOne();
                     return result;
