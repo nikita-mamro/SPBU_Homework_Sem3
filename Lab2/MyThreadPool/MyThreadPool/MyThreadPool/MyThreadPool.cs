@@ -21,9 +21,12 @@ namespace MyThreadPool
         private ConcurrentQueue<Action> taskQueue;
 
         /// <summary>
-        /// 
+        /// Возвращает токен, отвечающий за отмену работы пула
         /// </summary>
         private CancellationTokenSource cts;
+
+        public bool IsWorking
+            => !cts.IsCancellationRequested;
 
         /// <summary>
         /// Объект, с помощью которого подаём сигналы потокам
@@ -38,7 +41,7 @@ namespace MyThreadPool
         {
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
-            taskQueryWaiter = new AutoResetEvent(false);
+            taskQueryWaiter = new AutoResetEvent(true);
             cts = new CancellationTokenSource();
 
             for (var i = 0; i < numberOfThreads; ++i)
@@ -47,13 +50,16 @@ namespace MyThreadPool
                 {
                     while (!cts.IsCancellationRequested)
                     {
-                        // Блокируем исполнителя, пока поставщик задач не добавит в очередь MyTask 
-                        taskQueryWaiter.WaitOne();
-
-                        // Выполняем то, что появилось в очереди
+                        // Выполняем то, что появляется в очереди
                         if (taskQueue.TryDequeue(out var calculateTask))
                         {
                             calculateTask();
+                        }
+                        else
+                        {
+                            // Переводим исполнителя в состояние ожидания
+                            //, пока в очередь не добавится MyTask 
+                            taskQueryWaiter.WaitOne();
                         }
                     }
                 }));
@@ -64,10 +70,14 @@ namespace MyThreadPool
 
         /// <summary>
         /// Завершает работу потоков в пуле
-        /// (пока как-то не очень выглядит)
         /// </summary>
         public void Shutdown()
         {
+            if (!IsWorking)
+            {
+                throw new MyThreadPoolNotWorkingException("Pool is already not working.");
+            }
+
             cts.Cancel();
 
             taskQueue = null;
@@ -93,7 +103,7 @@ namespace MyThreadPool
         {
             if (cts.IsCancellationRequested)
             {
-                throw new Exception();
+                throw new MyThreadPoolNotWorkingException("Пул потоков не работает, невозможно поставить новую задачу в очередь на исполнение.");
             }
             
             // Добавляем задачу в очередь на исполнение

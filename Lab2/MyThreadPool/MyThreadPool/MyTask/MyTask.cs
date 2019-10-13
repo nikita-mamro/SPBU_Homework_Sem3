@@ -42,13 +42,21 @@ namespace MyThreadPool
         /// </summary>
         private ConcurrentQueue<Action> taskQueue;
 
+        private Exception exceptionHandler;
+
         public TResult Result
         {
             get
             {
                 // Здесь ждём, пока считается результат
                 resultWaiter.WaitOne();
-                return result;
+                
+                if (exceptionHandler == null)
+                {
+                    return result;
+                }
+
+                throw exceptionHandler;
             }
             private set
                 => result = value;
@@ -71,13 +79,34 @@ namespace MyThreadPool
         /// </summary>
         public void Calculate()
         {
-            result = supplier();
+            // Попытка выполнить задачу и в случае чего перехватить исключение
+            try
+            {
+                result = supplier();
+            }
+            catch (Exception supplierException)
+            {
+                exceptionHandler = supplierException;
+            }
 
             lock (taskLock)
-            {    
-                IsCompleted = true;
-                // Уведомляем о том, что результат посчитан
+            {
+                if (exceptionHandler == null)
+                {
+                    IsCompleted = true;
+                }
+                // Уведомляем о том, что задача выполнена
                 resultWaiter.Set();
+                // В случае, если текущая задача 
+                // должна продолжиться другими, исполняем их
+                try
+                {
+                    ProcessTasksFromQueue();
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
             }
         }
 
@@ -89,11 +118,43 @@ namespace MyThreadPool
             {
                 if (!IsCompleted)
                 {
-
+                    taskQueue.Enqueue(nextTask.Calculate);
+                    return nextTask;
                 }
             }
 
             return pool.QueueMyTask(nextTask);
+        }
+
+        /// <summary>
+        /// Выполнение задач, поставленных в очередь методом ContinueWith()
+        /// </summary>
+        private void ProcessTasksFromQueue()
+        {
+            // Если в очереди не стоят никакие задачи, сразу выходим
+            if (taskQueue.Count == 0)
+            {
+                return;
+            }
+
+            if (exceptionHandler == null)
+            {
+                // Если работа пула завершена, задача не выполнится
+                if (!pool.IsWorking)
+                {
+                    return;
+                }
+
+                foreach (var task in taskQueue)
+                {
+                    task();
+                }
+
+                return;
+            }
+
+            //Если в какой-то из задач в очереди бросается исключение, перекидываем его дальше
+            throw exceptionHandler;
         }
     }
 }
