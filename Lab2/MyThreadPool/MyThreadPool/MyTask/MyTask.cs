@@ -38,7 +38,7 @@ namespace MyThreadPool
         private MyThreadPool pool;
 
         /// <summary>
-        /// Очередь для задач из ContinueWith (планируется по крайней мере так использовать)
+        /// Очередь для задач из ContinueWith
         /// </summary>
         private ConcurrentQueue<Action> taskQueue;
 
@@ -95,8 +95,10 @@ namespace MyThreadPool
                 {
                     IsCompleted = true;
                 }
+
                 // Уведомляем о том, что задача выполнена
                 resultWaiter.Set();
+
                 // В случае, если текущая задача 
                 // должна продолжиться другими, исполняем их
                 try
