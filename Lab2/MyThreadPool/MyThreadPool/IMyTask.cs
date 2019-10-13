@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyThreadPool
 {
@@ -13,7 +9,7 @@ namespace MyThreadPool
     public interface IMyTask<TResult>
     {
         /// <summary>
-        /// True, если задача выполнена, иначе false
+        /// Флаг, указывающий на то, выполнена ли задача
         /// </summary>
         bool IsCompleted { get; }
 

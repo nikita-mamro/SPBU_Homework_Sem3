@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MyThreadPool
 {
@@ -28,41 +24,8 @@ namespace MyThreadPool
                 Console.WriteLine(tasks[i].IsCompleted);
 
             }
-            
 
             myThreadPool.Shutdown();
-        }
-
-        static void LocalTest1()
-        {
-            var myThreadPool = new MyThreadPool(10);
-
-            var tasks = new List<IMyTask<int>>();
-
-            for (var i = 0; i < 15; ++i)
-            {
-                tasks.Add(myThreadPool.QueueTask(Kek));
-            }
-
-            Thread.Sleep(2500);
-
-            myThreadPool.Shutdown();
-
-            foreach (var task in tasks)
-            {
-                Console.WriteLine(task.Result);
-                Console.WriteLine(task.IsCompleted);
-            }
-        }
-
-        static int Kek()
-        {
-            var answer = 5 * 5;
-
-            Thread.Sleep(1000);
-            Console.WriteLine("Finished calculating");
-
-            return answer;
         }
     }
 }

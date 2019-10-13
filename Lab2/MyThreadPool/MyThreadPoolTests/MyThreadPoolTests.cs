@@ -14,7 +14,7 @@ namespace MyThreadPool.Tests
         [TestMethod()]
         public void MyThreadPoolTest()
         {
-            
+            Assert.Fail();
         }
 
         [TestMethod()]

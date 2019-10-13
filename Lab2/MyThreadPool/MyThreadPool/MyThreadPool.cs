@@ -5,88 +5,100 @@ using System.Threading;
 
 namespace MyThreadPool
 {
+    /// <summary>
+    /// Класс, реализующий пул потоков
+    /// </summary>
     public class MyThreadPool
     {
-        private int currentThreads;
-
+        /// <summary>
+        /// Список потоков в пуле
+        /// </summary>
         private List<Thread> threads;
+
+        /// <summary>
+        /// Очередь задач на выполнение
+        /// </summary>
         private ConcurrentQueue<Action> taskQueue;
 
-        private CancellationTokenSource cts = new CancellationTokenSource();
-        private AutoResetEvent taskQueryWaiter = new AutoResetEvent(true);
-        private AutoResetEvent closeWaiter = new AutoResetEvent(true);
+        /// <summary>
+        /// 
+        /// </summary>
+        private CancellationTokenSource cts;
 
-        private Semaphore sem;
+        /// <summary>
+        /// Объект, с помощью которого подаём сигналы потокам
+        /// при добавлении в очередь очередной задачи
+        /// </summary>
+        private AutoResetEvent taskQueryWaiter;
 
-        private object closeLocker = new object();
-        private object locker = new object();
-
+        /// <summary>
+        /// Конструктор, создающий пул с фиксированным числом потков
+        /// </summary>
         public MyThreadPool(int numberOfThreads)
         {
-            sem = new Semaphore(numberOfThreads, numberOfThreads);
-
-            threads = new List<Thread>(numberOfThreads);
+            threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
+            taskQueryWaiter = new AutoResetEvent(false);
+            cts = new CancellationTokenSource();
 
             for (var i = 0; i < numberOfThreads; ++i)
             {
                 threads.Add(new Thread(() =>
                 {
-
                     while (!cts.IsCancellationRequested)
                     {
-                        if (taskQueue.TryDequeue(out var task))
-                        {
-                            task();
-                        }
-                        else
-                        {
-                            taskQueryWaiter.WaitOne();
-                        }
+                        // Блокируем исполнителя, пока поставщик задач не добавит в очередь MyTask 
+                        taskQueryWaiter.WaitOne();
 
+                        // Выполняем то, что появилось в очереди
+                        if (taskQueue.TryDequeue(out var calculateTask))
+                        {
+                            calculateTask();
+                        }
                     }
-
-                    //lock (closeLocker)
-                    //{
-                    //    --currentThreads;
-                    //}
-                    //
-                    //if (currentThreads == 0)
-                    //{
-                    //    closeWaiter.Set();
-                    //}
-
                 }));
 
                 threads[i].Start();
             }
         }
 
+        /// <summary>
+        /// Завершает работу потоков в пуле
+        /// (пока как-то не очень выглядит)
+        /// </summary>
         public void Shutdown()
         {
             cts.Cancel();
+
             taskQueue = null;
-            
+
             foreach (var thread in threads)
             {
                 thread.Abort();
             }
         }
 
+        /// <summary>
+        /// Ставит в очередь задачу, выполняющую переданное вычисление
+        /// </summary>
         public IMyTask<TResult> QueueTask<TResult>(Func<TResult> supplier)
         {
-            return QueueMyTask(new MyTask<TResult>(supplier));
+            return QueueMyTask(new MyTask<TResult>(supplier, this));
         }
 
-        private IMyTask<TResult> QueueMyTask<TResult>(MyTask<TResult> task)
+        /// <summary>
+        /// Ставит в очередь переданную задачу MyTask
+        /// </summary>
+        public IMyTask<TResult> QueueMyTask<TResult>(MyTask<TResult> task)
         {
             if (cts.IsCancellationRequested)
             {
                 throw new Exception();
             }
             
+            // Добавляем задачу в очередь на исполнение
             taskQueue.Enqueue(task.Calculate);
-
+            // Даём исполнителю задачи сигнал, если он в ожидании
             taskQueryWaiter.Set();
 
             return task;
