@@ -67,7 +67,7 @@ namespace MyThreadPool
 
         /// <summary>
         /// При создании MyTask требуем предоставить объект для вычислений,
-        /// а также указать, в каком пуле будет исполняться
+        /// а также указать, в каком пуле таск будет исполняться
         /// </summary>
         public MyTask(Func<TResult> supplier, MyThreadPool pool)
         {
