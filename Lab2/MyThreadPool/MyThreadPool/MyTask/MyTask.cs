@@ -49,7 +49,10 @@ namespace MyThreadPool
             get
             {
                 // Здесь ждём, пока считается результат
-                resultWaiter.WaitOne();
+                if (!IsCompleted)
+                {
+                    resultWaiter.WaitOne();
+                }
                 
                 if (exceptionHandler == null)
                 {

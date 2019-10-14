@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -252,6 +251,88 @@ namespace MyThreadPool.Tests
             pool.Shutdown();
 
             var res = nextTask.Result;
+        }
+
+        [TestMethod]
+        public void CalculatingAfterShutdownTest()
+        {
+            var pool = new MyThreadPool(1);
+
+            var task = pool.QueueTask(() =>
+            {
+                Thread.Sleep(100);
+                return 2 * 2;
+            });
+
+            pool.Shutdown();
+
+            Assert.IsTrue(task.IsCompleted);
+        }
+
+        [TestMethod]
+        public void CalculatingFromQueueAfterShutdownTest()
+        {
+            var pool = new MyThreadPool(2);
+            var tasks = new List<IMyTask<int>>();
+
+            for (var i = 0; i < 10; ++i)
+            {
+                tasks.Add(pool.QueueTask(() =>
+                {
+                    Thread.Sleep(100);
+                    return 2 * 2;
+                }));
+            }
+
+            pool.Shutdown();
+
+            foreach (var task in tasks)
+            {
+                Assert.IsTrue(task.IsCompleted);
+                Assert.AreEqual(4, task.Result);
+            }
+        }
+        
+        [TestMethod]
+        public void MultiThreadTaskResult()
+        {
+            var pool = new MyThreadPool(1);
+
+            var task = pool.QueueTask(() =>
+            {
+                return 2 * 2;
+            });
+
+            Thread.Sleep(10);
+            pool.Shutdown();
+
+            int result1 = 0;
+            int result2 = 0;
+
+            var resetEvent = new ManualResetEvent(false);
+
+            var thread1 = new Thread(() =>
+            {
+                resetEvent.WaitOne();
+                result1 = task.Result;
+            });
+
+            var thread2 = new Thread(() =>
+            {
+                resetEvent.WaitOne();
+                result2 = task.Result;
+            });
+
+            thread1.Start();
+            thread2.Start();
+
+            resetEvent.Set();
+
+            thread1.Join();
+            thread2.Join();
+
+            Assert.AreEqual(4, result1);
+            Assert.AreEqual(4, result2);
         }
     }
 }

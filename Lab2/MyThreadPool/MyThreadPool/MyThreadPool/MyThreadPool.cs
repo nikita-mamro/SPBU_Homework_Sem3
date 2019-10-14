@@ -15,6 +15,9 @@ namespace MyThreadPool
         /// </summary>
         private List<Thread> threads;
 
+        private int closedThreads = 0;
+        private object lockObject = new object();
+
         /// <summary>
         /// Очередь задач на выполнение
         /// </summary>
@@ -34,6 +37,10 @@ namespace MyThreadPool
         /// </summary>
         private AutoResetEvent taskQueryWaiter;
 
+        private AutoResetEvent readyToCloseWaiter;
+
+        private object queueLocker = new object();
+
         /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
         /// </summary>
@@ -41,15 +48,27 @@ namespace MyThreadPool
         {
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
-            taskQueryWaiter = new AutoResetEvent(true);
+            taskQueryWaiter = new AutoResetEvent(false);
+            readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
 
             for (var i = 0; i < numberOfThreads; ++i)
             {
                 threads.Add(new Thread(() =>
                 {
-                    while (!cts.IsCancellationRequested)
+                    while (true)
                     {
+                        if (cts.IsCancellationRequested)
+                        {
+                            lock (queueLocker)
+                            {
+                                if (taskQueue.Count == 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
                         // Выполняем то, что появляется в очереди
                         if (taskQueue.TryDequeue(out var calculateTask))
                         {
@@ -62,6 +81,9 @@ namespace MyThreadPool
                             taskQueryWaiter.WaitOne();
                         }
                     }
+
+                    // Подаём сигнал о том, что можно заканчивать работу
+                    readyToCloseWaiter.Set();
                 }));
 
                 threads[i].Start();
@@ -70,6 +92,7 @@ namespace MyThreadPool
 
         /// <summary>
         /// Завершает работу потоков в пуле
+        /// Если есть незавершённые задачи, даём им завершиться
         /// </summary>
         public void Shutdown()
         {
@@ -80,12 +103,15 @@ namespace MyThreadPool
 
             cts.Cancel();
 
-            taskQueue = null;
+            taskQueryWaiter.Set();
+            readyToCloseWaiter.WaitOne();
 
             foreach (var thread in threads)
             {
                 thread.Abort();
             }
+
+            taskQueue = null;
         }
 
         /// <summary>
