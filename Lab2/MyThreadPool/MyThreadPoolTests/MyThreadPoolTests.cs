@@ -279,7 +279,7 @@ namespace MyThreadPool.Tests
             {
                 tasks.Add(pool.QueueTask(() =>
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                     return 2 * 2;
                 }));
             }
