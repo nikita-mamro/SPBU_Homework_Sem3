@@ -15,9 +15,6 @@ namespace MyThreadPool
         /// </summary>
         private List<Thread> threads;
 
-        private int closedThreads = 0;
-        private object lockObject = new object();
-
         /// <summary>
         /// Очередь задач на выполнение
         /// </summary>
@@ -28,6 +25,9 @@ namespace MyThreadPool
         /// </summary>
         private CancellationTokenSource cts;
 
+        /// <summary>
+        /// Указывает на то, работает ли пул
+        /// </summary>
         public bool IsWorking
             => !cts.IsCancellationRequested;
 
@@ -37,9 +37,11 @@ namespace MyThreadPool
         /// </summary>
         private AutoResetEvent taskQueryWaiter;
 
+        /// <summary>
+        /// Объект, с помощью которого подаём сигнал
+        /// о готовности к заверешинию работы пула
+        /// </summary>
         private AutoResetEvent readyToCloseWaiter;
-
-        private object queueLocker = new object();
 
         /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
@@ -60,12 +62,9 @@ namespace MyThreadPool
                     {
                         if (cts.IsCancellationRequested)
                         {
-                            lock (queueLocker)
+                            if (taskQueue.Count == 0)
                             {
-                                if (taskQueue.Count == 0)
-                                {
-                                    break;
-                                }
+                                break;
                             }
                         }
 

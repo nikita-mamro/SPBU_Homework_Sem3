@@ -24,6 +24,9 @@ namespace MyThreadPool
         /// </summary>
         public bool IsCompleted { get; private set; } = false;
 
+        /// <summary>
+        /// Объект для блокировки задачи
+        /// </summary>
         private object taskLock = new object();
 
         /// <summary>
@@ -42,6 +45,9 @@ namespace MyThreadPool
         /// </summary>
         private ConcurrentQueue<Action> taskQueue;
 
+        /// <summary>
+        /// Обработчик брошенных исключений
+        /// </summary>
         private Exception exceptionHandler;
 
         public TResult Result
