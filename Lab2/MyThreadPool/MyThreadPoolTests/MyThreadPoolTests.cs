@@ -292,11 +292,14 @@ namespace MyThreadPool.Tests
                 Assert.AreEqual(4, task.Result);
             }
         }
-        
+
         [TestMethod]
         public void MultiThreadTaskResult()
         {
             var pool = new MyThreadPool(1);
+            var results = new List<int>();
+            var threads = new List<Thread>();
+            var numberOfThreads = 100;
 
             var task = pool.QueueTask(() =>
             {
@@ -306,33 +309,33 @@ namespace MyThreadPool.Tests
             Thread.Sleep(10);
             pool.Shutdown();
 
-            int result1 = 0;
-            int result2 = 0;
-
             var resetEvent = new ManualResetEvent(false);
 
-            var thread1 = new Thread(() =>
+            for (var i = 0; i < numberOfThreads; ++i)
             {
-                resetEvent.WaitOne();
-                result1 = task.Result;
-            });
+                threads.Add(new Thread(() =>
+                {
+                    resetEvent.WaitOne();
+                    results.Add(task.Result);
+                }));
+            }
 
-            var thread2 = new Thread(() =>
+            foreach (var thread in threads)
             {
-                resetEvent.WaitOne();
-                result2 = task.Result;
-            });
-
-            thread1.Start();
-            thread2.Start();
+                thread.Start();
+            }
 
             resetEvent.Set();
 
-            thread1.Join();
-            thread2.Join();
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
 
-            Assert.AreEqual(4, result1);
-            Assert.AreEqual(4, result2);
+            foreach (var result in results)
+            {
+                Assert.AreEqual(4, result);
+            }
         }
     }
 }
