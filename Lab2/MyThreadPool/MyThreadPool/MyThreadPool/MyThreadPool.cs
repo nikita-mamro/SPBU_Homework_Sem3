@@ -122,6 +122,7 @@ namespace MyThreadPool
             cts.Cancel();
 
             taskQueryWaiter.Set();
+            taskQueryWaiter.Reset();
 
             // Ждём, пока потоки доделают свои дела
             while (true)
