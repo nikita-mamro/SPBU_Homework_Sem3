@@ -10,10 +10,11 @@ namespace MyThreadPool
     /// Исключение, которое будет бросаться при попытке доступа к
     /// пулу, который уже не работает
     /// </summary>
+    [Serializable]
     public class MyThreadPoolNotWorkingException : Exception
     {
         public MyThreadPoolNotWorkingException() : base() { }
 
-        public MyThreadPoolNotWorkingException(string message) : base() { }
+        public MyThreadPoolNotWorkingException(string message) : base(message) { }
     }
 }

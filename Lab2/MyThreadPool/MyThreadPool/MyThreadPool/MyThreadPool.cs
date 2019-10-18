@@ -16,6 +16,11 @@ namespace MyThreadPool
         private List<Thread> threads;
 
         /// <summary>
+        /// Количество работающих потоков
+        /// </summary>
+        private int runningThreads;
+
+        /// <summary>
         /// Очередь задач на выполнение
         /// </summary>
         private ConcurrentQueue<Action> taskQueue;
@@ -44,6 +49,12 @@ namespace MyThreadPool
         private AutoResetEvent readyToCloseWaiter;
 
         /// <summary>
+        /// Блокировщик для корректной работы 
+        /// с runningThreads
+        /// </summary>
+        private object closingWaiterLock = new object();
+
+        /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
         /// </summary>
         public MyThreadPool(int numberOfThreads)
@@ -53,6 +64,8 @@ namespace MyThreadPool
             taskQueryWaiter = new AutoResetEvent(false);
             readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
+
+            runningThreads = numberOfThreads;
 
             for (var i = 0; i < numberOfThreads; ++i)
             {
@@ -81,6 +94,12 @@ namespace MyThreadPool
                         }
                     }
 
+                    // Фиксируем тот факт, что поток закончил работу
+                    lock (closingWaiterLock)
+                    {
+                        --runningThreads;
+                    }
+
                     // Подаём сигнал о том, что можно заканчивать работу
                     readyToCloseWaiter.Set();
                 }));
@@ -103,11 +122,21 @@ namespace MyThreadPool
             cts.Cancel();
 
             taskQueryWaiter.Set();
-            readyToCloseWaiter.WaitOne();
 
-            foreach (var thread in threads)
+            // Ждём, пока потоки доделают свои дела
+            while (true)
             {
-                thread.Abort();
+                readyToCloseWaiter.WaitOne();
+                taskQueryWaiter.Set();
+
+                lock (closingWaiterLock)
+                {
+                    // Если все закончили работу, выходим
+                    if (runningThreads == 0)
+                    {
+                        break;
+                    }
+                }
             }
 
             taskQueue = null;
@@ -139,6 +168,14 @@ namespace MyThreadPool
             return task;
         }
 
+        private Action QueueAction(Action task)
+        {
+            taskQueue.Enqueue(task);
+            taskQueryWaiter.Set();
+
+            return task;
+        }
+
         /// <summary>
         /// Класс, реализующий интерфейс IMyTask
         /// </summary>
@@ -165,10 +202,15 @@ namespace MyThreadPool
             private object taskLock = new object();
 
             /// <summary>
+            /// Объект для блокировки очереди с задачами из ContinueWith
+            /// </summary>
+            private object taskQueueLock = new object();
+
+            /// <summary>
             /// Объект, с помощью которого подаём сигналы потокам
             /// о готовности результата задачи
             /// </summary>
-            private AutoResetEvent resultWaiter;
+            private ManualResetEvent resultWaiter;
 
             /// <summary>
             /// Пул потоков, в котором выполняется MyTask
@@ -178,7 +220,7 @@ namespace MyThreadPool
             /// <summary>
             /// Очередь для задач из ContinueWith
             /// </summary>
-            private ConcurrentQueue<Action> taskQueue;
+            private Queue<Action> taskQueue;
 
             /// <summary>
             /// Обработчик брошенных исключений
@@ -190,10 +232,8 @@ namespace MyThreadPool
                 get
                 {
                     // Здесь ждём, пока считается результат
-                    if (!IsCompleted)
-                    {
-                        resultWaiter.WaitOne();
-                    }
+                    // ManualResetEvent даст сингал всем ждущим потокам
+                    resultWaiter.WaitOne();
 
                     if (exceptionHandler == null)
                     {
@@ -210,12 +250,13 @@ namespace MyThreadPool
             /// При создании MyTask требуем предоставить объект для вычислений,
             /// а также указать, в каком пуле таск будет исполняться
             /// </summary>
-            public MyTask(Func<TResult> supplier, MyThreadPool pool)
+            public MyTask(Func<TResult> supplier, MyThreadPool pool, Exception exceptionHandler = null)
             {
                 this.supplier = supplier;
                 this.pool = pool;
-                resultWaiter = new AutoResetEvent(false);
-                taskQueue = new ConcurrentQueue<Action>();
+                this.exceptionHandler = exceptionHandler;
+                resultWaiter = new ManualResetEvent(false);
+                taskQueue = new Queue<Action>();
             }
 
             /// <summary>
@@ -233,28 +274,35 @@ namespace MyThreadPool
                 {
                     exceptionHandler = supplierException;
                 }
-
-                lock (taskLock)
+                finally
                 {
-                    if (exceptionHandler == null)
+                    lock (taskLock)
                     {
-                        IsCompleted = true;
+                        if (exceptionHandler == null)
+                        {
+                            IsCompleted = true;
+                        }
+
+                        // Уведомляем о том, что выполнение задачи завершено
+                        resultWaiter.Set();
+
+                        // Кидаем в пул все задачи,
+                        // которые должны следовать за текущей;
+                        // Так они смогут быть исполнены любым из свободных потоков, 
+                        // не только тем, в котором выполняли текущие вычисления
+                        while (taskQueue.Count != 0)
+                        {
+                            pool.QueueAction(taskQueue.Dequeue());
+                        }
                     }
-
-                    // Уведомляем о том, что задача выполнена
-                    resultWaiter.Set();
-
-                    // В случае, если текущая задача 
-                    // должна продолжиться другими, исполняем их
-                    ProcessTasksFromQueue();
                 }
             }
 
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
             {
-                var nextTask = new MyTask<TNewResult>(() => supplier(result), pool);
+                var nextTask = new MyTask<TNewResult>(() => supplier(Result), pool, exceptionHandler);
 
-                lock (taskLock)
+                lock (taskQueueLock)
                 {
                     if (!IsCompleted)
                     {
@@ -264,37 +312,6 @@ namespace MyThreadPool
                 }
 
                 return pool.QueueMyTask(nextTask);
-            }
-
-            /// <summary>
-            /// Выполнение задач, поставленных в очередь методом ContinueWith()
-            /// </summary>
-            private void ProcessTasksFromQueue()
-            {
-                // Если в очереди не стоят никакие задачи, сразу выходим
-                if (taskQueue.Count == 0)
-                {
-                    return;
-                }
-
-                if (exceptionHandler == null)
-                {
-                    // Если работа пула завершена, задача не выполнится
-                    if (!pool.IsWorking)
-                    {
-                        return;
-                    }
-
-                    foreach (var task in taskQueue)
-                    {
-                        task();
-                    }
-
-                    return;
-                }
-
-                //Если в какой-то из задач в очереди бросается исключение, перекидываем его дальше
-                throw exceptionHandler;
             }
         }
     }

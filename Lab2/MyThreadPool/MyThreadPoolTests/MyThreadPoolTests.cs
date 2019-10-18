@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace MyThreadPool.Tests
 {
@@ -241,7 +242,7 @@ namespace MyThreadPool.Tests
         {
             var pool = new MyThreadPool(5);
 
-            var task = pool.QueueTask<int>(() => 2 * 2);
+            var task = pool.QueueTask(() => 2 * 2);
             var nextTask = task.ContinueWith<int>((value) =>
             {
                 throw new SpecialTestException();
@@ -251,6 +252,38 @@ namespace MyThreadPool.Tests
             pool.Shutdown();
 
             var res = nextTask.Result;
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SpecialTestException))]
+        public void CatchingExceptionFromContinueWithAncestorTest()
+        {
+            var pool = new MyThreadPool(1);
+            var task = pool.QueueTask(() => 2 * 2);
+
+            var next = task.ContinueWith((value) =>
+            {
+                Thread.Sleep(100);
+                return value * 2;
+            });
+
+            var nextNext = next.ContinueWith((value) =>
+            {
+                Thread.Sleep(100);
+                if (value == 10)
+                {
+                    return 1;
+                }
+                throw new SpecialTestException();
+            });
+
+            var nextNextNext = nextNext.ContinueWith((value) =>
+            {
+                Thread.Sleep(100);
+                return 0;
+            });
+
+            var res = nextNextNext.Result;
         }
 
         [TestMethod]
@@ -297,7 +330,7 @@ namespace MyThreadPool.Tests
         public void MultiThreadTaskResult()
         {
             var pool = new MyThreadPool(1);
-            var results = new List<int>();
+            var results = new ConcurrentBag<int>();
             var threads = new List<Thread>();
             var numberOfThreads = 100;
 

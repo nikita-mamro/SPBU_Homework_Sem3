@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MyTask\IMyTask.cs" />
+    <Compile Include="Exceptions\ContinueWithChainException.cs" />
     <Compile Include="MyThreadPool\MyThreadPool.cs" />
     <Compile Include="Exceptions\MyThreadPoolNotWorkingException.cs" />
     <Compile Include="Program.cs" />
