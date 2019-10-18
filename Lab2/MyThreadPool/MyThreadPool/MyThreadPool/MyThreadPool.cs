@@ -129,6 +129,7 @@ namespace MyThreadPool
             {
                 readyToCloseWaiter.WaitOne();
                 taskQueryWaiter.Set();
+                taskQueryWaiter.Reset();
 
                 lock (closingWaiterLock)
                 {
