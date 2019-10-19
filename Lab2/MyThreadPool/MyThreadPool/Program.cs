@@ -8,18 +8,40 @@ namespace MyThreadPool
     {
         static void Main(string[] args)
         {
-            var pool = new MyThreadPool(5);
-
+            var pool = new MyThreadPool(2);
+            var mre = new ManualResetEvent(false);
             var tasks = new List<IMyTask<int>>();
 
-            for (var i = 0; i < 50; ++i)
+            var thread1 = new Thread(() =>
             {
-                tasks.Add(pool.QueueTask(() => 2 * 2));
-                Console.WriteLine(tasks[i].Result);
-                Console.WriteLine(tasks[i].IsCompleted);
-            }
+                mre.WaitOne();
+                Thread.Sleep(1000);
+                tasks.Add(pool.QueueTask(() => 1));
+            });
+
+            var thread2 = new Thread(() =>
+            {
+                mre.WaitOne();
+                Thread.Sleep(1000);
+                tasks.Add(pool.QueueTask(() => 2));
+            });
+
+            thread1.Start();
+            thread2.Start();
+
+            mre.Set();
+
+            thread1.Join();
+            thread2.Join();
 
             pool.Shutdown();
+
+            //Thread.Sleep(100);
+
+            foreach (var task in tasks)
+            {
+                Console.WriteLine(task.Result);
+            }
         }
     }
 }

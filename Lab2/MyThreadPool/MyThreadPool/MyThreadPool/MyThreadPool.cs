@@ -40,7 +40,7 @@ namespace MyThreadPool
         /// Объект, с помощью которого подаём сигналы потокам
         /// при добавлении в очередь очередной задачи
         /// </summary>
-        private AutoResetEvent taskQueryWaiter;
+        private ManualResetEvent taskManualQueryWaiter;
 
         /// <summary>
         /// Объект, с помощью которого подаём сигнал
@@ -61,7 +61,7 @@ namespace MyThreadPool
         {
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
-            taskQueryWaiter = new AutoResetEvent(false);
+            taskManualQueryWaiter = new ManualResetEvent(false);
             readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
 
@@ -73,6 +73,8 @@ namespace MyThreadPool
                 {
                     while (true)
                     {
+                        taskManualQueryWaiter.Reset();
+
                         if (cts.IsCancellationRequested)
                         {
                             if (taskQueue.Count == 0)
@@ -89,8 +91,8 @@ namespace MyThreadPool
                         else
                         {
                             // Переводим исполнителя в состояние ожидания,
-                            // пока в очередь не добавится MyTask 
-                            taskQueryWaiter.WaitOne();
+                            // пока в очередь не добавится MyTask
+                            taskManualQueryWaiter.WaitOne();
                         }
                     }
 
@@ -121,13 +123,13 @@ namespace MyThreadPool
 
             cts.Cancel();
 
-            taskQueryWaiter.Set();
+            taskManualQueryWaiter.Set();
 
             // Ждём, пока потоки по одному доделают свои дела
             while (true)
             {
                 readyToCloseWaiter.WaitOne();
-                taskQueryWaiter.Set();
+                taskManualQueryWaiter.Set();
 
                 lock (closingWaiterLock)
                 {
@@ -170,7 +172,7 @@ namespace MyThreadPool
             // Добавляем задачу в очередь на исполнение
             taskQueue.Enqueue(task);
             // Даём исполнителю задачи сигнал, если он в ожидании
-            taskQueryWaiter.Set();
+            taskManualQueryWaiter.Set();
 
             return task;
         }
