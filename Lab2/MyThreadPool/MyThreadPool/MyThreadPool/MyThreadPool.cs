@@ -174,6 +174,7 @@ namespace MyThreadPool
         {
             taskQueue.Enqueue(task);
             taskQueryWaiter.Set();
+            taskQueryWaiter.Reset();
 
             return task;
         }
@@ -204,11 +205,6 @@ namespace MyThreadPool
             private object taskLock = new object();
 
             /// <summary>
-            /// Объект для блокировки очереди с задачами из ContinueWith
-            /// </summary>
-            private object taskQueueLock = new object();
-
-            /// <summary>
             /// Объект, с помощью которого подаём сигналы потокам
             /// о готовности результата задачи
             /// </summary>
@@ -223,6 +219,11 @@ namespace MyThreadPool
             /// Очередь для задач из ContinueWith
             /// </summary>
             private Queue<Action> taskQueue;
+
+            /// <summary>
+            /// Блокировщик очереди задач из ContinueWith
+            /// </summary>
+            private object taskQueueLock = new object();
 
             /// <summary>
             /// Обработчик брошенных исключений
@@ -292,9 +293,12 @@ namespace MyThreadPool
                         // которые должны следовать за текущей;
                         // Так они смогут быть исполнены любым из свободных потоков, 
                         // не только тем, в котором выполняли текущие вычисления
-                        while (taskQueue.Count != 0)
+                        lock (taskQueueLock)
                         {
-                            pool.QueueAction(taskQueue.Dequeue());
+                            while (taskQueue.Count != 0)
+                            {
+                                pool.QueueAction(taskQueue.Dequeue());
+                            }
                         }
                     }
                 }
