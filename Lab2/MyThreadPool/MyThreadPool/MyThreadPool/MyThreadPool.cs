@@ -40,7 +40,7 @@ namespace MyThreadPool
         /// Объект, с помощью которого подаём сигналы потокам
         /// при добавлении в очередь очередной задачи
         /// </summary>
-        private ManualResetEvent taskQueryWaiter;
+        private AutoResetEvent taskQueryWaiter;
 
         /// <summary>
         /// Объект, с помощью которого подаём сигнал
@@ -61,7 +61,7 @@ namespace MyThreadPool
         {
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
-            taskQueryWaiter = new ManualResetEvent(false);
+            taskQueryWaiter = new AutoResetEvent(false);
             readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
 
@@ -122,14 +122,12 @@ namespace MyThreadPool
             cts.Cancel();
 
             taskQueryWaiter.Set();
-            taskQueryWaiter.Reset();
 
-            // Ждём, пока потоки доделают свои дела
+            // Ждём, пока потоки по одному доделают свои дела
             while (true)
             {
                 readyToCloseWaiter.WaitOne();
                 taskQueryWaiter.Set();
-                taskQueryWaiter.Reset();
 
                 lock (closingWaiterLock)
                 {
@@ -173,7 +171,6 @@ namespace MyThreadPool
             taskQueue.Enqueue(task);
             // Даём исполнителю задачи сигнал, если он в ожидании
             taskQueryWaiter.Set();
-            taskQueryWaiter.Reset();
 
             return task;
         }
