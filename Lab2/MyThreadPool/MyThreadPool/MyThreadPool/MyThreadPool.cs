@@ -161,18 +161,17 @@ namespace MyThreadPool
             {
                 throw new MyThreadPoolNotWorkingException("Пул потоков не работает, невозможно поставить новую задачу в очередь на исполнение.");
             }
-            
-            // Добавляем задачу в очередь на исполнение
-            taskQueue.Enqueue(task.Calculate);
-            // Даём исполнителю задачи сигнал, если он в ожидании
-            taskQueryWaiter.Set();
+
+            QueueAction(task.Calculate);
 
             return task;
         }
 
         private Action QueueAction(Action task)
         {
+            // Добавляем задачу в очередь на исполнение
             taskQueue.Enqueue(task);
+            // Даём исполнителю задачи сигнал, если он в ожидании
             taskQueryWaiter.Set();
             taskQueryWaiter.Reset();
 
@@ -310,11 +309,15 @@ namespace MyThreadPool
 
                 lock (taskQueueLock)
                 {
-                    if (!IsCompleted)
+                    lock (taskLock)
                     {
-                        taskQueue.Enqueue(nextTask.Calculate);
-                        return nextTask;
+                        if (!IsCompleted)
+                        {
+                            taskQueue.Enqueue(nextTask.Calculate);
+                            return nextTask;
+                        }
                     }
+
                 }
 
                 return pool.QueueMyTask(nextTask);
