@@ -249,11 +249,10 @@ namespace MyThreadPool
             /// При создании MyTask требуем предоставить объект для вычислений,
             /// а также указать, в каком пуле таск будет исполняться
             /// </summary>
-            public MyTask(Func<TResult> supplier, MyThreadPool pool, Exception exceptionHandler = null)
+            public MyTask(Func<TResult> supplier, MyThreadPool pool)
             {
                 this.supplier = supplier;
                 this.pool = pool;
-                this.exceptionHandler = exceptionHandler;
                 resultWaiter = new ManualResetEvent(false);
                 taskQueue = new Queue<Action>();
             }
@@ -302,7 +301,7 @@ namespace MyThreadPool
 
             public IMyTask<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> supplier)
             {
-                var nextTask = new MyTask<TNewResult>(() => supplier(Result), pool, exceptionHandler);
+                var nextTask = new MyTask<TNewResult>(() => supplier(Result), pool);
 
                 lock (taskQueueLock)
                 {
@@ -314,7 +313,6 @@ namespace MyThreadPool
                             return nextTask;
                         }
                     }
-
                 }
 
                 return pool.QueueMyTask(nextTask);
