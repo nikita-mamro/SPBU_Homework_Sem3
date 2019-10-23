@@ -33,7 +33,7 @@ namespace MyThreadPool
         /// <summary>
         /// Указывает на то, работает ли пул
         /// </summary>
-        public bool IsWorking
+        private bool isWorking
             => !cts.IsCancellationRequested;
 
         /// <summary>
@@ -42,17 +42,13 @@ namespace MyThreadPool
         /// </summary>
         private ManualResetEvent taskManualQueryWaiter;
 
-        /// <summary>
-        /// Объект, с помощью которого подаём сигнал
-        /// о готовности к заверешинию работы пула
-        /// </summary>
-        private AutoResetEvent readyToCloseWaiter;
+        private AutoResetEvent taskAutoQueryWaiter;
 
         /// <summary>
-        /// Блокировщик для корректной работы 
-        /// с runningThreads
+        /// Объект, с помощью которого подаём сигнал
+        /// о готовности к завершению работы пула
         /// </summary>
-        private object closingWaiterLock = new object();
+        private AutoResetEvent readyToCloseWaiter;
 
         /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
@@ -61,6 +57,7 @@ namespace MyThreadPool
         {
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
+            taskAutoQueryWaiter = new AutoResetEvent(false);
             taskManualQueryWaiter = new ManualResetEvent(false);
             readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
@@ -93,14 +90,14 @@ namespace MyThreadPool
                             // Переводим исполнителя в состояние ожидания,
                             // пока в очередь не добавится MyTask
                             taskManualQueryWaiter.WaitOne();
+                            //taskQueryWaiter.WaitOne();
                         }
                     }
 
                     // Фиксируем тот факт, что поток закончил работу
-                    lock (closingWaiterLock)
-                    {
-                        --runningThreads;
-                    }
+                    Interlocked.Decrement(ref runningThreads);
+
+                    //taskAutoQueryWaiter.Set();
 
                     // Подаём сигнал о том, что можно заканчивать работу
                     readyToCloseWaiter.Set();
@@ -111,12 +108,18 @@ namespace MyThreadPool
         }
 
         /// <summary>
+        /// Метод, с помощью котрого можно узнать о состоянии потока
+        /// </summary>
+        public bool IsWorking()
+            => isWorking;
+
+        /// <summary>
         /// Завершает работу потоков в пуле
         /// Если есть незавершённые задачи, даём им завершиться
         /// </summary>
         public void Shutdown()
         {
-            if (!IsWorking)
+            if (!isWorking)
             {
                 throw new MyThreadPoolNotWorkingException("Pool is already not working.");
             }
@@ -131,13 +134,10 @@ namespace MyThreadPool
                 readyToCloseWaiter.WaitOne();
                 taskManualQueryWaiter.Set();
 
-                lock (closingWaiterLock)
+                // Если все закончили работу, выходим
+                if (runningThreads == 0)
                 {
-                    // Если все закончили работу, выходим
-                    if (runningThreads == 0)
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
 
@@ -157,14 +157,14 @@ namespace MyThreadPool
         /// </summary>
         private IMyTask<TResult> QueueMyTask<TResult>(MyTask<TResult> task)
         {
-            if (cts.IsCancellationRequested)
+            if (!cts.IsCancellationRequested)
             {
-                throw new MyThreadPoolNotWorkingException("Пул потоков не работает, невозможно поставить новую задачу в очередь на исполнение.");
+                QueueAction(task.Calculate);
+
+                return task;
             }
 
-            QueueAction(task.Calculate);
-
-            return task;
+            throw new MyThreadPoolNotWorkingException("Пул потоков не работает, невозможно поставить новую задачу в очередь на исполнение.");
         }
 
         private Action QueueAction(Action task)
@@ -305,9 +305,9 @@ namespace MyThreadPool
             {
                 var nextTask = new MyTask<TNewResult>(() => supplier(Result), pool);
 
-                lock (taskQueueLock)
+                lock (taskLock)
                 {
-                    lock (taskLock)
+                    lock (taskQueueLock)
                     {
                         if (!IsCompleted)
                         {

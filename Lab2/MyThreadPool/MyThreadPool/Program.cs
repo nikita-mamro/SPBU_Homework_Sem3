@@ -36,8 +36,6 @@ namespace MyThreadPool
 
             pool.Shutdown();
 
-            //Thread.Sleep(100);
-
             foreach (var task in tasks)
             {
                 Console.WriteLine(task.Result);
