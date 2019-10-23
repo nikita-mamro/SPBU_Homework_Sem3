@@ -40,8 +40,6 @@ namespace MyThreadPool
         /// Объект, с помощью которого подаём сигналы потокам
         /// при добавлении в очередь очередной задачи
         /// </summary>
-        private ManualResetEvent taskManualQueryWaiter;
-
         private AutoResetEvent taskAutoQueryWaiter;
 
         /// <summary>
@@ -51,6 +49,11 @@ namespace MyThreadPool
         private AutoResetEvent readyToCloseWaiter;
 
         /// <summary>
+        /// Блокировщик сигнальщика taskAutoQueryWaiter
+        /// </summary>
+        private object autoQueryWaiterLocker = new object();
+
+        /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
         /// </summary>
         public MyThreadPool(int numberOfThreads)
@@ -58,7 +61,6 @@ namespace MyThreadPool
             threads = new List<Thread>();
             taskQueue = new ConcurrentQueue<Action>();
             taskAutoQueryWaiter = new AutoResetEvent(false);
-            taskManualQueryWaiter = new ManualResetEvent(false);
             readyToCloseWaiter = new AutoResetEvent(false);
             cts = new CancellationTokenSource();
 
@@ -70,8 +72,6 @@ namespace MyThreadPool
                 {
                     while (true)
                     {
-                        taskManualQueryWaiter.Reset();
-
                         if (cts.IsCancellationRequested)
                         {
                             if (taskQueue.Count == 0)
@@ -89,15 +89,12 @@ namespace MyThreadPool
                         {
                             // Переводим исполнителя в состояние ожидания,
                             // пока в очередь не добавится MyTask
-                            taskManualQueryWaiter.WaitOne();
-                            //taskQueryWaiter.WaitOne();
+                            taskAutoQueryWaiter.WaitOne();
                         }
                     }
 
                     // Фиксируем тот факт, что поток закончил работу
                     Interlocked.Decrement(ref runningThreads);
-
-                    //taskAutoQueryWaiter.Set();
 
                     // Подаём сигнал о том, что можно заканчивать работу
                     readyToCloseWaiter.Set();
@@ -126,13 +123,17 @@ namespace MyThreadPool
 
             cts.Cancel();
 
-            taskManualQueryWaiter.Set();
+            // Будим один из потоков
+            taskAutoQueryWaiter.Set();
 
             // Ждём, пока потоки по одному доделают свои дела
             while (true)
             {
+                // Ждём, пока поток не просигналит о том, что он завершился
                 readyToCloseWaiter.WaitOne();
-                taskManualQueryWaiter.Set();
+                // Закончивший работу поток будит следующий поток
+                // По цепочке так завершат работу все потоки
+                taskAutoQueryWaiter.Set();
 
                 // Если все закончили работу, выходим
                 if (runningThreads == 0)
@@ -148,9 +149,7 @@ namespace MyThreadPool
         /// Ставит в очередь задачу, выполняющую переданное вычисление
         /// </summary>
         public IMyTask<TResult> QueueTask<TResult>(Func<TResult> supplier)
-        {
-            return QueueMyTask(new MyTask<TResult>(supplier, this));
-        }
+            => QueueMyTask(new MyTask<TResult>(supplier, this));
 
         /// <summary>
         /// Ставит в очередь переданную задачу MyTask
@@ -172,7 +171,16 @@ namespace MyThreadPool
             // Добавляем задачу в очередь на исполнение
             taskQueue.Enqueue(task);
             // Даём исполнителю задачи сигнал, если он в ожидании
-            taskManualQueryWaiter.Set();
+            lock (autoQueryWaiterLocker)
+            {
+                // По задумке блокировщик autoQueryWaiterLocker не даст двум потокам, которые 
+                // параллельно ставят 2 задачи в очередь, одновременно просигналить потокам из пула
+                //
+                // В таком случае вроде как :) должны избегать ситуации, когда при параллельной постановке
+                // в очередь двух задач, только один поток разбудится, а второй будет отдыхать
+                // на taskAutoQueryWaiter, из-за чего вторая задача зависнет до момента, пока первый поток не доработает
+                taskAutoQueryWaiter.Set();
+            }
 
             return task;
         }
