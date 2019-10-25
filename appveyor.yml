@@ -3,6 +3,7 @@ image: Visual Studio 2017
 environment:
   matrix:
   - solution_path: Lab1\Lazy\Lazy.sln
+  - solution_path: Lab2\MyThreadPool\MyThreadPool.sln
 
 before_build:
   - nuget restore %solution_path%
