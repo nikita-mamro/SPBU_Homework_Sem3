@@ -49,11 +49,6 @@ namespace MyThreadPool
         private AutoResetEvent readyToCloseWaiter;
 
         /// <summary>
-        /// Блокировщик сигнальщика taskAutoQueryWaiter
-        /// </summary>
-        private object autoQueryWaiterLocker = new object();
-
-        /// <summary>
         /// Конструктор, создающий пул с фиксированным числом потков
         /// </summary>
         public MyThreadPool(int numberOfThreads)
@@ -83,6 +78,11 @@ namespace MyThreadPool
                         // Выполняем то, что появляется в очереди
                         if (taskQueue.TryDequeue(out var calculateTask))
                         {
+                            if (!taskQueue.IsEmpty)
+                            {
+                                taskAutoQueryWaiter.Set();
+                            }
+
                             calculateTask();
                         }
                         else
@@ -171,16 +171,7 @@ namespace MyThreadPool
             // Добавляем задачу в очередь на исполнение
             taskQueue.Enqueue(task);
             // Даём исполнителю задачи сигнал, если он в ожидании
-            lock (autoQueryWaiterLocker)
-            {
-                // По задумке блокировщик autoQueryWaiterLocker не даст двум потокам, которые 
-                // параллельно ставят 2 задачи в очередь, одновременно просигналить потокам из пула
-                //
-                // В таком случае вроде как :) должны избегать ситуации, когда при параллельной постановке
-                // в очередь двух задач, только один поток разбудится, а второй будет отдыхать
-                // на taskAutoQueryWaiter, из-за чего вторая задача зависнет до момента, пока первый поток не доработает
-                taskAutoQueryWaiter.Set();
-            }
+            taskAutoQueryWaiter.Set();
 
             return task;
         }
