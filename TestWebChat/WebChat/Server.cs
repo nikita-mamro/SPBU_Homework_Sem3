@@ -12,6 +12,8 @@ namespace WebChat
         private int port;
         private IPAddress address = IPAddress.Parse("127.0.0.1");
         private volatile bool isAlive = true;
+        private object sendLocker = new object();
+        private object recieveLocker = new object();
 
         public Server(int port)
         {
@@ -34,7 +36,13 @@ namespace WebChat
 
             if (message.ToString() == "exit")
             {
-                isAlive = false;
+                lock (sendLocker)
+                {
+                    lock (recieveLocker)
+                    {
+                        isAlive = false;
+                    }
+                }
             }
 
             Console.WriteLine(message.ToString());
@@ -71,8 +79,11 @@ namespace WebChat
                             Send(stream);
                         }
 
-                        stream.Close();
-                        listener.Stop();
+                        lock (sendLocker)
+                        {
+                            stream.Close();
+                            listener.Stop();
+                        }
                     });
 
                     var recievingThread = new Thread(() =>
@@ -82,8 +93,11 @@ namespace WebChat
                             Recieve(stream);
                         }
 
-                        stream.Close();
-                        listener.Stop();
+                        lock (recieveLocker)
+                        {
+                            stream.Close();
+                            listener.Stop();
+                        }
                     });
 
                     sendingThread.Start();
@@ -93,10 +107,6 @@ namespace WebChat
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                
             }
         }
     }
