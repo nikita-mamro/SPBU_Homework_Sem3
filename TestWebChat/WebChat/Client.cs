@@ -11,6 +11,7 @@ namespace WebChat
         private TcpClient client;
         private int port;
         private IPAddress hostAddress;
+        private volatile bool isAlive = true;
 
         public Client(IPAddress address, int port)
         {
@@ -23,30 +24,30 @@ namespace WebChat
         private void Recieve(NetworkStream stream)
         {
             var data = new byte[256];
-            var response = new StringBuilder();
+            var message = new StringBuilder();
 
             do
             {
                 int bytes = stream.Read(data, 0, data.Length);
-                response.Append(Encoding.UTF8.GetString(data, 0, bytes));
+                message.Append(Encoding.UTF8.GetString(data, 0, bytes));
             }
-            while (stream.DataAvailable); // пока данные есть в потоке
+            while (stream.DataAvailable);
 
-            Console.WriteLine(response.ToString());
+            Console.WriteLine(message.ToString());
         }
 
         private void Send(NetworkStream stream)
         {
-            // сообщение для отправки
-            var response = Console.ReadLine();
-            // преобразуем сообщение в массив байтов
-            var data = Encoding.UTF8.GetBytes(response);
+            var message = Console.ReadLine();
 
-            // отправка сообщения
+            var data = Encoding.UTF8.GetBytes(message);
+
             stream.Write(data, 0, data.Length);
-            //Console.WriteLine("Отправлено сообщение: {0}", response);
 
-            
+            if (message.ToString() == "exit")
+            {
+                isAlive = false;
+            }
         }
 
         public void Start()
@@ -61,26 +62,28 @@ namespace WebChat
 
                 var sendingThread = new Thread(() =>
                 {
-                    while (true)
+                    while (isAlive)
                     {
                         Send(stream);
                     }
+
+                    stream.Close();
+                    client.Close();
                 });
 
                 var recievingThread = new Thread(() =>
                 {
-                    while (true)
+                    while (isAlive)
                     {
                         Recieve(stream);
                     }
+
+                    stream.Close();
+                    client.Close();
                 });
 
                 sendingThread.Start();
                 recievingThread.Start();
-
-                // Закрываем потоки
-                //stream.Close();
-                //client.Close();
             }
             catch (SocketException e)
             {

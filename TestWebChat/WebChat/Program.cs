@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
+using System.Net.Sockets;
 
 namespace WebChat
 {
@@ -13,6 +14,10 @@ namespace WebChat
                 try
                 {
                     DoWork(args);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine(e.Message);
                 }
                 catch (Exception e)
                 {
@@ -34,7 +39,7 @@ namespace WebChat
                 }
                 else
                 {
-
+                    Console.WriteLine("Неверный формат ввода порта");
                 }
             }
             else if (args.Length == 2)
@@ -46,7 +51,7 @@ namespace WebChat
                 }
                 else
                 {
-
+                    Console.WriteLine("Неверный формат ввода порта или адреса");
                 }
             }
             else

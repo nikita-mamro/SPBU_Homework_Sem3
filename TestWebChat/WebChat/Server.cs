@@ -11,6 +11,7 @@ namespace WebChat
         private TcpListener listener;
         private int port;
         private IPAddress address = IPAddress.Parse("127.0.0.1");
+        private volatile bool isAlive = true;
 
         public Server(int port)
         {
@@ -22,28 +23,30 @@ namespace WebChat
         private void Recieve(NetworkStream stream)
         {
             var data = new byte[256];
-            var response = new StringBuilder();
+            var message = new StringBuilder();
 
             do
             {
                 int bytes = stream.Read(data, 0, data.Length);
-                response.Append(Encoding.UTF8.GetString(data, 0, bytes));
+                message.Append(Encoding.UTF8.GetString(data, 0, bytes));
             }
             while (stream.DataAvailable); // пока данные есть в потоке
 
-            Console.WriteLine(response.ToString());
+            if (message.ToString() == "exit")
+            {
+                isAlive = false;
+            }
+
+            Console.WriteLine(message.ToString());
         }
 
         private void Send(NetworkStream stream)
         {
-            // сообщение для отправки клиенту
             var response = Console.ReadLine();
-            // преобразуем сообщение в массив байтов
-            var data = Encoding.UTF8.GetBytes(response);
 
-            // отправка сообщения
+            var data = Encoding.UTF8.GetBytes(response);
+            
             stream.Write(data, 0, data.Length);
-            //Console.WriteLine("Отправлено сообщение: {0}", response);
         }
 
         public void Start()
@@ -57,25 +60,30 @@ namespace WebChat
                 {
                     // получаем входящее подключение
                     var client = listener.AcceptTcpClient();
-                    //Console.WriteLine("Подключен клиент. Выполнение запроса...");
 
                     // получаем сетевой поток для чтения и записи
                     var stream = client.GetStream();
 
                     var sendingThread = new Thread(() =>
                     {
-                        while (true)
+                        while (isAlive)
                         {
                             Send(stream);
                         }
+
+                        stream.Close();
+                        listener.Stop();
                     });
 
                     var recievingThread = new Thread(() =>
                     {
-                        while (true)
+                        while (isAlive)
                         {
                             Recieve(stream);
                         }
+
+                        stream.Close();
+                        listener.Stop();
                     });
 
                     sendingThread.Start();
