@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace FTPClient
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello from client");
+            var client = new FTPClient("127.0.0.1", 8888);
+            await client.Start();
         }
     }
 }

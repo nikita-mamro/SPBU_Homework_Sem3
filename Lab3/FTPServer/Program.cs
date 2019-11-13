@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace FTPServer
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello from server");
+            var server = new FTPServer(8888);
+
+            await server.Start();
         }
     }
 }
