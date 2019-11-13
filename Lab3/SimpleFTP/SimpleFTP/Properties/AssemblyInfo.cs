@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Общие сведения об этой сборке предоставляются следующим набором
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
 // связанные с этой сборкой.
-[assembly: AssemblyTitle("FTPClient")]
+[assembly: AssemblyTitle("SimpleFTP")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FTPClient")]
+[assembly: AssemblyProduct("SimpleFTP")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Следующий GUID представляет идентификатор typelib, если этот проект доступен из модели COM
-[assembly: Guid("7dcb9bfe-cde2-4280-82f6-42b9959eca75")]
+[assembly: Guid("5d5917d0-8baf-4e84-8586-af2a8b6cefad")]
 
 // Сведения о версии сборки состоят из указанных ниже четырех значений:
 //

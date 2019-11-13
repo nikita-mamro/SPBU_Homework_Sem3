@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SimpleFTP
 {
@@ -6,7 +10,6 @@ namespace SimpleFTP
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello from SimopleFTP");
         }
     }
 }
