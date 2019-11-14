@@ -30,7 +30,7 @@ namespace Client
 
             var result = new List<(string, bool)>();
 
-            for (var i = 0; i < resultLength; i += 2)
+            for (var i = 1; i < resultLength * 2; i += 2)
             {
                 result.Add((splitResponse[i], bool.Parse(splitResponse[i + 1])));
             }

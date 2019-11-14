@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Client
@@ -19,52 +17,30 @@ namespace Client
             this.server = server;
             this.port = port;
         }
-
-        public async Task Start()
-        {
-            try
-            {
-                client = new TcpClient(server, port);
-
-                //Console.WriteLine("Клиент подключен");
-
-                using (var stream = client.GetStream())
-                {
-                    var writer = new StreamWriter(stream) { AutoFlush = true };
-                    var reader = new StreamReader(stream);
-
-                    var path = Console.ReadLine();
-                    await writer.WriteLineAsync("1" + path);
-
-                    var response = await reader.ReadLineAsync();
-                    Console.WriteLine(response); //works
-
-                    var res = ResponseHandler.HandleListResponse(response);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        // Not working
+        
         public async Task<List<(string, bool)>> List(string path)
         {
-            var client = new TcpClient(server, port);
+            client = new TcpClient(server, port);
 
             using (var stream = client.GetStream())
             {
                 var writer = new StreamWriter(stream) { AutoFlush = true };
                 var reader = new StreamReader(stream);
 
-                await writer.WriteAsync("1" + path);
-                var response = await reader.ReadLineAsync();
+                await writer.WriteLineAsync("1" + path);
 
-                return ResponseHandler.HandleListResponse(response);
+                var response = await reader.ReadLineAsync();
+                Console.WriteLine(response);
+
+                var res = ResponseHandler.HandleListResponse(response);
+                return res;
             }
         }
 
+        public async Task Get(string pathFrom, string pathTo)
+        {
+
+        }
 
         public void Stop()
         {
