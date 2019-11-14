@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FTPServer
 {
+    /// <summary>
+    /// Класс, отвечающий за обработку запросов серверу от клиента
+    /// </summary>
     public static class RequestHandler
     {
+        /// <summary>
+        /// Принимает запрос в виде строки и записывает ответ, используя переданный StreamWriter
+        /// </summary>
         public async static Task HandleRequest(string request, StreamWriter writer)
         {
             if (int.TryParse(request[0].ToString(), out var id))
             {
-                var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, request.Remove(0, 1));
+                var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\", request.Remove(0, 1));
 
                 if (id == 1)
                 {
@@ -31,6 +33,9 @@ namespace FTPServer
             await writer.WriteLineAsync(error);
         }
 
+        /// <summary>
+        /// Обрабатывает запрос List
+        /// </summary>
         private static async Task HandleListRequest(string path, StreamWriter writer)
         {
             if (!Directory.Exists(path))
@@ -64,11 +69,22 @@ namespace FTPServer
             await writer.WriteLineAsync(response.ToString());
         }
 
+        /// <summary>
+        /// Обрабатывает запрос Get
+        /// </summary>
         private static async Task HandleGetRequest(string path, StreamWriter writer)
         {
             if (!File.Exists(path))
             {
                 await writer.WriteLineAsync("-1");
+            }
+
+            var size = new FileInfo(path).Length;
+            await writer.WriteLineAsync($"{size}");
+
+            using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+            {
+                await fileStream.CopyToAsync(writer.BaseStream);
             }
         }
     }

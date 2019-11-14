@@ -1,20 +1,19 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SimpleFTP;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FTPClient;
 using FTPServer;
+using System.IO;
 
 namespace SimpleFTP.Tests
 {
+    /// <summary>
+    /// Тесты корректной работы сервера и клиента
+    /// </summary>
     [TestClass]
     public class SimpleFTPTests
     {
         Server server;
         Client client;
+        string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\Downloads\\");
 
         [TestInitialize]
         public void Initialize()

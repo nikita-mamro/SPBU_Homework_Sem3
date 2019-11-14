@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +9,9 @@ namespace FTPServer
 {
     public class Server
     {
+        /// <summary>
+        /// Необходимые для взаимодействия с клиентами объекты
+        /// </summary>
         private IPAddress localAddress = IPAddress.Parse("127.0.0.1");
         private int port;
         private TcpListener listener;
@@ -24,6 +24,9 @@ namespace FTPServer
             listener = new TcpListener(localAddress, port);
         }
 
+        /// <summary>
+        /// Начало работы сервера
+        /// </summary>
         public async Task Start()
         {
             try
@@ -48,6 +51,9 @@ namespace FTPServer
             }
         }
 
+        /// <summary>
+        /// Метод, ппроверяющий, подключён ли данный клиент к серверу
+        /// </summary>
         private bool IsConnected(TcpClient client)
         {
             try
@@ -74,6 +80,9 @@ namespace FTPServer
             }
         }
 
+        /// <summary>
+        /// Обработчик запросов, поступающих от клиента
+        /// </summary>
         private void HandleClient(TcpClient client)
         {
             Task.Run(async () =>
@@ -90,7 +99,7 @@ namespace FTPServer
 
                     var recieved = await reader.ReadLineAsync();
                     Console.WriteLine(recieved);
-
+                    
                     await RequestHandler.HandleRequest(recieved, writer);
                 }
 
@@ -98,6 +107,9 @@ namespace FTPServer
             });
         }
 
+        /// <summary>
+        /// Остановка работы сервера
+        /// </summary>
         public void Stop()
         {
             cts.Cancel();

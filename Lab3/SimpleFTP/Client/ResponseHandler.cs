@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FTPClient
 {
+    /// <summary>
+    /// Класс, отвечающий за обработку ответов от сервера
+    /// </summary>
     public static class ResponseHandler
     {
+        /// <summary>
+        /// Преобразование строкового ответа на запрос List в список пар (string, bool)
+        /// </summary>
         public static List<(string, bool)> HandleListResponse(string response)
         {
             var splitResponse = response.Split(' ');

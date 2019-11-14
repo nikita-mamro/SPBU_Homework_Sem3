@@ -6,8 +6,14 @@ using System.Threading.Tasks;
 
 namespace FTPClient
 {
+    /// <summary>
+    /// Класс, реализующий FTP клиента
+    /// </summary>
     public class Client
     {
+        /// <summary>
+        /// Необходимые для взаимодействия с сервером объекты
+        /// </summary>
         private string server;
         private int port;
         private TcpClient client;
@@ -18,11 +24,17 @@ namespace FTPClient
             this.port = port;
         }
 
+        /// <summary>
+        /// Подключение к серверу
+        /// </summary>
         public void Connect()
         {
             client = new TcpClient(server, port);
         }
 
+        /// <summary>
+        /// Работа пользователя с клиентом
+        /// </summary>
         public async Task Start()
         {
             Connect();
@@ -41,10 +53,14 @@ namespace FTPClient
 
                 List<(string, bool)> res;
 
+                var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\Downloads\\");
+
                 try
                 {
-                    res = await List(input);
+                    //await Get(input, path);
 
+                    res = await List(input);
+                    
                     foreach (var e in res)
                     {
                         Console.WriteLine(e);
@@ -57,6 +73,10 @@ namespace FTPClient
             }
         }
         
+        /// <summary>
+        /// Запрос на получение списка файлов и папок по указанному пути на сервере
+        /// </summary>
+        /// <returns>Список значений (имя, папка - true / файл - false) </returns>
         public async Task<List<(string, bool)>> List(string path)
         {
             var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
@@ -69,8 +89,16 @@ namespace FTPClient
             return ResponseHandler.HandleListResponse(response);
         }
 
+        /// <summary>
+        /// Скачивание файла с сервера
+        /// </summary>
+        /// <param name="pathFrom">Путь к файлу на сервере</param>
+        /// <param name="pathTo">Путь к месту скачивания</param>
         public async Task Get(string pathFrom, string pathTo)
         {
+            var tmp = pathFrom.Split('\\');
+            var fileName = tmp[tmp.Length - 1];
+
             var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
             var reader = new StreamReader(client.GetStream());
 
@@ -90,9 +118,17 @@ namespace FTPClient
                 throw new FileNotFoundException();
             }
 
-            
+            var fileStream = new FileStream(pathTo + fileName, FileMode.CreateNew);
+
+            await reader.BaseStream.CopyToAsync(fileStream);
+
+            fileStream.Flush();
+            fileStream.Close();
         }
 
+        /// <summary>
+        /// Остановка работы клиента
+        /// </summary>
         public void Stop()
         {
             client.GetStream().Dispose();
