@@ -51,12 +51,12 @@ namespace Server
 
             foreach (var file in files)
             {
-                response.Append($"{file} false");
+                response.Append($"{file} false ");
             }
 
             foreach (var folder in folders)
             {
-                response.Append($"{folder} true");
+                response.Append($"{folder} true ");
             }
 
             return response.ToString();

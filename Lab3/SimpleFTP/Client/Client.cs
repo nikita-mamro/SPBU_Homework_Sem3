@@ -26,37 +26,21 @@ namespace Client
             {
                 client = new TcpClient(server, port);
 
-                Console.WriteLine("Клиент подключён к серверу");
+                //Console.WriteLine("Клиент подключен");
 
-                while (client.Connected)
+                using (var stream = client.GetStream())
                 {
-                    try
-                    {
-                        var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
-                        var reader = new StreamReader(client.GetStream());
-                        
-                        
-                        var path = Console.ReadLine();
-                        await writer.WriteLineAsync("1" + path);
-                        var response = await reader.ReadLineAsync();
-                        Console.WriteLine(response); //works
-                        
-                        //var res = ResponseHandler.HandleListResponse(response);
+                    var writer = new StreamWriter(stream) { AutoFlush = true };
+                    var reader = new StreamReader(stream);
 
-                        var res = await List(path); // crashes
-                        //
-                        //foreach (var e in res)
-                        //{
-                        //    Console.WriteLine(e.Item1);
-                        //}
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
+                    var path = Console.ReadLine();
+                    await writer.WriteLineAsync("1" + path);
+
+                    var response = await reader.ReadLineAsync();
+                    Console.WriteLine(response); //works
+
+                    var res = ResponseHandler.HandleListResponse(response);
                 }
-
-                Console.WriteLine("Сервер разорвал поделючение");
             }
             catch (Exception e)
             {
@@ -65,17 +49,20 @@ namespace Client
         }
 
         // Not working
-        private async Task<List<(string, bool)>> List(string path)
+        public async Task<List<(string, bool)>> List(string path)
         {
-            var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
-            var reader = new StreamReader(client.GetStream());
+            var client = new TcpClient(server, port);
 
-            await writer.WriteAsync("1" + path);
-            var response = await reader.ReadLineAsync();
+            using (var stream = client.GetStream())
+            {
+                var writer = new StreamWriter(stream) { AutoFlush = true };
+                var reader = new StreamReader(stream);
 
-            Console.WriteLine(response);
+                await writer.WriteAsync("1" + path);
+                var response = await reader.ReadLineAsync();
 
-            return ResponseHandler.HandleListResponse(response);
+                return ResponseHandler.HandleListResponse(response);
+            }
         }
 
 
