@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Client
+namespace FTPClient
 {
     public static class ResponseHandler
     {
@@ -25,7 +25,7 @@ namespace Client
 
             if (resultLength == -1)
             {
-                throw new Exception("-1");
+                throw new Exception(response);
             }
 
             var result = new List<(string, bool)>();

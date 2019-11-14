@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server
+namespace FTPServer
 {
     public static class RequestHandler
     {
-        public static string HandleRequest(string request)
+        public async static Task HandleRequest(string request, StreamWriter writer)
         {
             if (int.TryParse(request[0].ToString(), out var id))
             {
@@ -17,25 +18,26 @@ namespace Server
 
                 if (id == 1)
                 {
-                    return HandleListRequest(path);
+                    await HandleListRequest(path, writer);
                 }
 
                 if (id == 2)
                 {
-                    //return HandleGetRequest(path);
+                    await HandleGetRequest(path, writer);
                 }
             }
 
             var error = "Wrong format error";
-            return error;
+            await writer.WriteLineAsync(error);
         }
 
-        private static string HandleListRequest(string path)
+        private static async Task HandleListRequest(string path, StreamWriter writer)
         {
             if (!Directory.Exists(path))
             {
                 var errorResponse = "-1";
-                return errorResponse;
+                await writer.WriteLineAsync(errorResponse);
+                return;
             }
 
             var response = new StringBuilder();
@@ -59,14 +61,15 @@ namespace Server
                 response.Append($"{folder} true ");
             }
 
-            return response.ToString();
+            await writer.WriteLineAsync(response.ToString());
         }
 
-        private static string HandleGetRequest(string path)
+        private static async Task HandleGetRequest(string path, StreamWriter writer)
         {
-            var response = new StringBuilder();
-
-            return response.ToString();
+            if (!File.Exists(path))
+            {
+                await writer.WriteLineAsync("-1");
+            }
         }
     }
 }
