@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace FTPClient
 {
@@ -23,12 +24,12 @@ namespace FTPClient
             }
             else
             {
-                throw new Exception(response);
+                throw new ArgumentException(response);
             }
 
             if (resultLength == -1)
             {
-                throw new Exception(response);
+                throw new DirectoryNotFoundException(response);
             }
 
             var result = new List<(string, bool)>();

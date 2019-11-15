@@ -33,7 +33,7 @@ namespace FTPClient
         }
 
         /// <summary>
-        /// Работа пользователя с клиентом
+        /// Для демонстрации работы с запросом List
         /// </summary>
         public async Task Start()
         {
@@ -57,8 +57,6 @@ namespace FTPClient
 
                 try
                 {
-                    //await Get(input, path);
-
                     res = await List(input);
                     
                     foreach (var e in res)
@@ -68,6 +66,7 @@ namespace FTPClient
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine(e.GetType());
                     Console.WriteLine(e.Message);
                 }
             }
@@ -85,7 +84,7 @@ namespace FTPClient
             await writer.WriteLineAsync("1" + path);
 
             var response = await reader.ReadLineAsync();
-
+            
             return ResponseHandler.HandleListResponse(response);
         }
 

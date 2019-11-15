@@ -4,6 +4,8 @@ using FTPServer;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System;
+using System.Threading;
 
 namespace SimpleFTP.Tests
 {
@@ -15,6 +17,8 @@ namespace SimpleFTP.Tests
     {
         Server server;
         Client client;
+        string address;
+        int port;
         string rootPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
         string folderPath = "res\\Downloads\\";
         string pathToDownloaded;
@@ -24,9 +28,12 @@ namespace SimpleFTP.Tests
         [TestInitialize]
         public void Initialize()
         {
+            port = 9999;
+            address = "127.0.0.1";
+
             pathToDownloaded = Path.Combine(rootPath, folderPath);
-            server = new Server(8888);
-            client = new Client("127.0.0.1", 8888);
+            server = new Server(port);
+            client = new Client(address, port);
 
             expectedListTest = new List<(string, bool)>();
             expectedListTestFolder = new List<(string, bool)>();
@@ -47,6 +54,8 @@ namespace SimpleFTP.Tests
 
             var listTest = client.List("Test").Result;
 
+            server.Stop();
+
             for (var i = 0; i < expectedListTest.Count; ++i)
             {
                 Assert.AreEqual(expectedListTest[i], listTest[i]);
@@ -62,10 +71,48 @@ namespace SimpleFTP.Tests
 
             var listTestFolder = client.List("Test\\testFolder").Result;
 
+            server.Stop();
+
             for (var i = 0; i < expectedListTestFolder.Count; ++i)
             {
                 Assert.AreEqual(expectedListTestFolder[i], listTestFolder[i]);
             }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(AggregateException))]
+        public void ListDirectoryExceptionTest()
+        {
+            Task.Run(async () => await server.Start());
+
+            client.Connect();
+
+            var res = client.List("ololo").Result;
+
+            server.Stop();
+        }
+
+        [TestMethod]
+        public void GetTest()
+        {
+            Task.Run(async () =>
+            {
+                await server.Start();
+
+                client.Connect();
+
+                await client.Get("Test\\testTxt.txt", pathToDownloaded);
+
+                server.Stop();
+
+                var pathToFile = Path.Combine(pathToDownloaded, "testTxt.txt");
+
+                Assert.IsTrue(File.Exists(pathToFile));
+
+                File.Delete(pathToFile);
+
+                server.Stop();
+            });
         }
     }
 }
