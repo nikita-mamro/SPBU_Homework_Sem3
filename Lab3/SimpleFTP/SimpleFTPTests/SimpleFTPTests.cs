@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
-using System.Threading;
 
 namespace SimpleFTP.Tests
 {
@@ -55,6 +54,7 @@ namespace SimpleFTP.Tests
             var listTest = client.List("Test").Result;
 
             server.Stop();
+            client.Stop();
 
             for (var i = 0; i < expectedListTest.Count; ++i)
             {
@@ -72,6 +72,7 @@ namespace SimpleFTP.Tests
             var listTestFolder = client.List("Test\\testFolder").Result;
 
             server.Stop();
+            client.Stop();
 
             for (var i = 0; i < expectedListTestFolder.Count; ++i)
             {
@@ -90,6 +91,7 @@ namespace SimpleFTP.Tests
             var res = client.List("ololo").Result;
 
             server.Stop();
+            client.Stop();
         }
 
         [TestMethod]
@@ -111,7 +113,36 @@ namespace SimpleFTP.Tests
 
                 File.Delete(pathToFile);
 
+                client.Stop();
+            });
+        }
+
+        [TestMethod]
+        public void MultipleTaskTest()
+        {
+            Task.Run(async () =>
+            {
+                await server.Start();
+
+                client.Connect();
+
+                await client.Get("Test\\testWord.docx", pathToDownloaded);
+
+                var pathToFile = Path.Combine(pathToDownloaded, "testWord.docx");
+
+                Assert.IsTrue(File.Exists(pathToFile));
+
+                File.Delete(pathToFile);
+
+                var listTestFolder = client.List("Test\\testFolder").Result;
+
                 server.Stop();
+                client.Stop();
+
+                for (var i = 0; i < expectedListTestFolder.Count; ++i)
+                {
+                    Assert.AreEqual(expectedListTestFolder[i], listTestFolder[i]);
+                }
             });
         }
     }

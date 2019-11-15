@@ -83,7 +83,7 @@ namespace FTPServer
         {
             Task.Run(async () =>
             {
-                while (true)
+                while (!cts.IsCancellationRequested)
                 {
                     if (!IsConnected(client))
                     {

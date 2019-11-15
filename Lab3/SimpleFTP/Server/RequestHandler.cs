@@ -49,12 +49,10 @@ namespace FTPServer
 
             var response = new StringBuilder();
 
-            var responseSize = 0;
-
             var files = Directory.GetFiles(path);
             var folders = Directory.GetDirectories(path);
 
-            responseSize = files.Length + folders.Length;
+            var responseSize = files.Length + folders.Length;
 
             response.Append($"{responseSize} ");
 
