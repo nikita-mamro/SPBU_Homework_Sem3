@@ -28,6 +28,9 @@ namespace SimpleFTP.Tests
             server = new Server(8888);
             client = new Client("127.0.0.1", 8888);
 
+            expectedListTest = new List<(string, bool)>();
+            expectedListTestFolder = new List<(string, bool)>();
+
             expectedListTest.Add((".\\Test\\testTxt.txt", false));
             expectedListTest.Add((".\\Test\\testWord.docx", false));
             expectedListTest.Add((".\\Test\\testFolder", true));
@@ -36,21 +39,17 @@ namespace SimpleFTP.Tests
         }
 
         [TestMethod]
-        public void SimpleFTPTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod]
         public void ListTest()
         {
             Task.Run(async () => await server.Start());
 
+            client.Connect();
+
             var listTest = client.List("Test").Result;
 
-            for (var i = 0; i < expectedListTestFolder.Count; ++i)
+            for (var i = 0; i < expectedListTest.Count; ++i)
             {
-                Assert.AreEqual(expectedListTestFolder[i], listTest[i]);
+                Assert.AreEqual(expectedListTest[i], listTest[i]);
             }
         }
 
@@ -58,6 +57,8 @@ namespace SimpleFTP.Tests
         public void ListFolderInFolderTest()
         {
             Task.Run(async () => await server.Start());
+
+            client.Connect();
 
             var listTestFolder = client.List("Test\\testFolder").Result;
 
