@@ -33,13 +33,9 @@ namespace FTPServer
             {
                 listener.Start();
 
-                Console.WriteLine("Сервер запущен");
-
                 while (!cts.IsCancellationRequested)
                 {
                     var client = await listener.AcceptTcpClientAsync();
-
-                    Console.WriteLine("Подключён новый клиент");
 
                     HandleClient(client);
                 }
@@ -98,12 +94,9 @@ namespace FTPServer
                     var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
 
                     var recieved = await reader.ReadLineAsync();
-                    Console.WriteLine(recieved);
                     
                     await RequestHandler.HandleRequest(recieved, writer);
                 }
-
-                Console.WriteLine("Работа с клиентом закончена");
             });
         }
 
@@ -118,8 +111,6 @@ namespace FTPServer
             {
                 listener.Stop();
             }
-
-            Console.WriteLine("Server stopped");
         }
     }
 }

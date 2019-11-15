@@ -16,11 +16,13 @@ namespace FTPServer
         {
             if (int.TryParse(request[0].ToString(), out var id))
             {
-                var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\", request.Remove(0, 1));
+                var rootPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\");
+                var path = Path.Combine(rootPath, request.Remove(0, 1));
 
                 if (id == 1)
                 {
-                    await HandleListRequest(path, writer);
+                    var offset = rootPath.Length;
+                    await HandleListRequest(path, offset, writer);
                 }
 
                 if (id == 2)
@@ -36,7 +38,7 @@ namespace FTPServer
         /// <summary>
         /// Обрабатывает запрос List
         /// </summary>
-        private static async Task HandleListRequest(string path, StreamWriter writer)
+        private static async Task HandleListRequest(string path, int offset, StreamWriter writer)
         {
             if (!Directory.Exists(path))
             {
@@ -58,12 +60,14 @@ namespace FTPServer
 
             foreach (var file in files)
             {
-                response.Append($"{file} false ");
+                var formattedName = file.Remove(0, offset);
+                response.Append($".\\{formattedName} false ");
             }
 
             foreach (var folder in folders)
             {
-                response.Append($"{folder} true ");
+                var formattedName = folder.Remove(0, offset);
+                response.Append($".\\{formattedName} true ");
             }
 
             await writer.WriteLineAsync(response.ToString());
