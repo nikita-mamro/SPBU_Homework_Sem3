@@ -97,6 +97,13 @@ namespace SimpleFTP.Tests
         [TestMethod]
         public void GetTest()
         {
+            var pathToFile = Path.Combine(pathToDownloaded, "testTxt.txt");
+
+            if (File.Exists(pathToFile))
+            {
+                File.Delete(pathToFile);
+            }
+
             Task.Run(async () =>
             {
                 await server.Start();
@@ -107,8 +114,6 @@ namespace SimpleFTP.Tests
 
                 server.Stop();
 
-                var pathToFile = Path.Combine(pathToDownloaded, "testTxt.txt");
-
                 Assert.IsTrue(File.Exists(pathToFile));
 
                 File.Delete(pathToFile);
@@ -118,8 +123,29 @@ namespace SimpleFTP.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(AggregateException))]
+        public void GetFileNotFoundTest()
+        {
+            Task.Run(async () => await server.Start());
+            
+            client.Connect();
+
+            client.Get("olololo", pathToDownloaded).Wait();
+
+            server.Stop();
+            client.Stop();
+        }
+
+        [TestMethod]
         public void MultipleTaskTest()
         {
+            var pathToFile = Path.Combine(pathToDownloaded, "testWord.docx");
+
+            if (File.Exists(pathToFile))
+            {
+                File.Delete(pathToFile);
+            }
+
             Task.Run(async () =>
             {
                 await server.Start();
@@ -128,11 +154,7 @@ namespace SimpleFTP.Tests
 
                 await client.Get("Test\\testWord.docx", pathToDownloaded);
 
-                var pathToFile = Path.Combine(pathToDownloaded, "testWord.docx");
-
                 Assert.IsTrue(File.Exists(pathToFile));
-
-                File.Delete(pathToFile);
 
                 var listTestFolder = client.List("Test\\testFolder").Result;
 
