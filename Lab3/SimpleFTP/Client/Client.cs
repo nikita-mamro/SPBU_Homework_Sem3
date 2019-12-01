@@ -9,13 +9,19 @@ namespace FTPClient
     /// <summary>
     /// Класс, реализующий FTP клиента
     /// </summary>
-    public class Client
+    public class Client : IDisposable
     {
         /// <summary>
-        /// Необходимые для взаимодействия с сервером объекты
+        /// Адрес сервера, к которому должен подключаться клиент
         /// </summary>
         private string server;
+        /// <summary>
+        /// Номер порта для подключения
+        /// </summary>
         private int port;
+        /// <summary>
+        /// Обеспечивает подключение к серверу
+        /// </summary>
         private TcpClient client;
 
         public Client(string server, int port)
@@ -51,14 +57,12 @@ namespace FTPClient
                     break;
                 }
 
-                List<(string, bool)> res;
-
                 var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\Downloads\\");
 
                 try
                 {
-                    res = await List(input);
-                    
+                    var res = await List(input);
+
                     foreach (var e in res)
                     {
                         Console.WriteLine(e);
@@ -71,7 +75,7 @@ namespace FTPClient
                 }
             }
         }
-        
+
         /// <summary>
         /// Запрос на получение списка файлов и папок по указанному пути на сервере
         /// </summary>
@@ -84,7 +88,7 @@ namespace FTPClient
             await writer.WriteLineAsync("1" + path);
 
             var response = await reader.ReadLineAsync();
-            
+
             return ResponseHandler.HandleListResponse(response);
         }
 
@@ -105,9 +109,7 @@ namespace FTPClient
 
             var response = await reader.ReadLineAsync();
 
-            long fileSize;
-
-            if (!long.TryParse(response, out fileSize))
+            if (!long.TryParse(response, out long fileSize))
             {
                 throw new Exception(response);
             }
@@ -117,12 +119,10 @@ namespace FTPClient
                 throw new FileNotFoundException();
             }
 
-            var fileStream = new FileStream(pathTo + fileName, FileMode.CreateNew);
-
-            await reader.BaseStream.CopyToAsync(fileStream);
-
-            fileStream.Flush();
-            fileStream.Close();
+            using (var fileStream = new FileStream(pathTo + fileName, FileMode.CreateNew))
+            {
+                await reader.BaseStream.CopyToAsync(fileStream);
+            }
         }
 
         /// <summary>
@@ -130,8 +130,15 @@ namespace FTPClient
         /// </summary>
         public void Stop()
         {
-            client.GetStream().Dispose();
             client.Close();
+        }
+
+        /// <summary>
+        /// Освобождение ресурсов
+        /// </summary>
+        public void Dispose()
+        {
+            client.Dispose();
         }
     }
 }

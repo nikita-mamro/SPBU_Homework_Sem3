@@ -16,13 +16,7 @@ namespace FTPClient
         {
             var splitResponse = response.Split(' ');
 
-            int resultLength;
-
-            if (int.TryParse(splitResponse[0], out var res))
-            {
-                resultLength = res;
-            }
-            else
+            if (!int.TryParse(splitResponse[0], out var resultLength))
             {
                 throw new ArgumentException(response);
             }

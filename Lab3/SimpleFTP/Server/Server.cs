@@ -7,14 +7,26 @@ using System.Threading.Tasks;
 
 namespace FTPServer
 {
+    /// <summary>
+    /// Класс, реализующий FTP сервер
+    /// </summary>
     public class Server
     {
         /// <summary>
-        /// Необходимые для взаимодействия с клиентами объекты
+        /// Адрес сервера
         /// </summary>
         private IPAddress localAddress = IPAddress.Parse("127.0.0.1");
+        /// <summary>
+        /// Порт, по которому должны подключаться клиенты
+        /// </summary>
         private int port;
+        /// <summary>
+        /// Обеспечивает прослушивание подключений
+        /// </summary>
         private TcpListener listener;
+        /// <summary>
+        /// Отвечает за отмену процессов после выключения сервера
+        /// </summary>
         private CancellationTokenSource cts;
 
         public Server(int port)
@@ -67,7 +79,7 @@ namespace FTPServer
 
                     return true;
                 }
-                
+
                 return false;
             }
             catch
@@ -94,7 +106,7 @@ namespace FTPServer
                     var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
 
                     var recieved = await reader.ReadLineAsync();
-                    
+
                     await RequestHandler.HandleRequest(recieved, writer);
                 }
             });
