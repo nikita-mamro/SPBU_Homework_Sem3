@@ -4,6 +4,7 @@ environment:
   matrix:
   - solution_path: Lab1\Lazy\Lazy.sln
   - solution_path: Lab2\MyThreadPool\MyThreadPool.sln
+  - solution_path: TestTicTacToe\TicTacToe\TicTacToe.sln
 
 before_build:
   - nuget restore %solution_path%
