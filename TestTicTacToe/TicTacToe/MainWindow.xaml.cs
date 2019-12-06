@@ -82,6 +82,8 @@ namespace TicTacToe
             var position = column + 3 * row;
 
             MakeTurn(position, button);
+
+            CheckIfEnded(position);
         }
 
         /// <summary>
@@ -108,8 +110,6 @@ namespace TicTacToe
             }
 
             playerATurn ^= true;
-
-            CheckIfEnded(position);
         }
 
         /// <summary>

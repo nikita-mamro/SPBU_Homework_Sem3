@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace TicTacToe
 {
+    /// <summary>
+    /// Набор возможных состояний ячейки поля
+    /// </summary>
     public enum CellCondition
     {
         Empty,
