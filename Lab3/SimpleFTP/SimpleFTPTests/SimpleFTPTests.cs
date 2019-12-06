@@ -14,15 +14,15 @@ namespace SimpleFTP.Tests
     [TestClass]
     public class SimpleFTPTests
     {
-        Server server;
-        Client client;
-        string address;
-        int port;
-        string rootPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
-        string folderPath = "res\\Downloads\\";
-        string pathToDownloaded;
-        List<(string, bool)> expectedListTest;
-        List<(string, bool)> expectedListTestFolder;
+        private Server server;
+        private Client client;
+        private string address;
+        private int port;
+        private string rootPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+        private string folderPath = "res\\Downloads\\";
+        private string pathToDownloaded;
+        private List<(string, bool)> expectedListTest;
+        private List<(string, bool)> expectedListTestFolder;
 
         [TestInitialize]
         public void Initialize()

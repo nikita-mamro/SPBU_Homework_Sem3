@@ -57,8 +57,6 @@ namespace FTPClient
                     break;
                 }
 
-                var path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName, "res\\Downloads\\");
-
                 try
                 {
                     var res = await List(input);
@@ -68,9 +66,11 @@ namespace FTPClient
                         Console.WriteLine(e);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (
+                    e is SocketException
+                    || e is IOException
+                    )
                 {
-                    Console.WriteLine(e.GetType());
                     Console.WriteLine(e.Message);
                 }
             }

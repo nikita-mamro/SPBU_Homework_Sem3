@@ -52,7 +52,7 @@ namespace FTPServer
                     HandleClient(client);
                 }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                 Console.WriteLine(e.Message);
                 Stop();
