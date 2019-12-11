@@ -16,14 +16,17 @@ namespace FTPServer
         /// Адрес сервера
         /// </summary>
         private IPAddress localAddress = IPAddress.Parse("127.0.0.1");
+
         /// <summary>
         /// Порт, по которому должны подключаться клиенты
         /// </summary>
         private int port;
+
         /// <summary>
         /// Обеспечивает прослушивание подключений
         /// </summary>
         private TcpListener listener;
+
         /// <summary>
         /// Отвечает за отмену процессов после выключения сервера
         /// </summary>

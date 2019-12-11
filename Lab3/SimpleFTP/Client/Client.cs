@@ -15,10 +15,12 @@ namespace FTPClient
         /// Адрес сервера, к которому должен подключаться клиент
         /// </summary>
         private string server;
+
         /// <summary>
         /// Номер порта для подключения
         /// </summary>
         private int port;
+
         /// <summary>
         /// Обеспечивает подключение к серверу
         /// </summary>
