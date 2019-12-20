@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using MyNUnit;
+using System.IO;
 
 namespace MyNUnit
 {
@@ -11,27 +13,11 @@ namespace MyNUnit
     {
         static void Main(string[] args)
         {
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            //var assemblies = getAss
-
-            foreach (Assembly a in assemblies)
-            {
-                Console.WriteLine($"Assembly: {a}");
-                foreach (Type t in a.ExportedTypes)
-                {
-                    foreach (MethodInfo mi in t.GetMethods())
-                    {
-                        foreach (Attribute attr in Attribute.GetCustomAttributes(mi))
-                        {
-                            if (attr.GetType() == typeof(Attributes.TestAttribute))
-                            {
-                                Console.WriteLine("Method {0} has a {1} attribute.", mi.Name, ((Attributes.TestAttribute)attr));
-                            }
-                        }
-                    }
-                }
-            }
+            string root = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            
+            root = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult");
+            
+            MyNUnit.RunTests(root);
         }
     }
 }

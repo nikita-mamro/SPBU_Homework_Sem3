@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestResult", "..\TestProjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeTest", "..\TestProjects\BeforeTest\BeforeTest.csproj", "{849D04B6-05F8-4054-929F-9DD19EB434B8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProjectsToTest", "ProjectsToTest", "{2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProjects", "TestProjects", "{2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterTest", "..\TestProjects\AfterTest\AfterTest.csproj", "{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}"
 EndProject

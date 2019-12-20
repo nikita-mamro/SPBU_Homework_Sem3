@@ -1,51 +1,78 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MyNUnit.Attributes;
 using System.Reflection;
 using System.IO;
 using System.Collections.Concurrent;
+using MyNUnit.Attributes;
 
 namespace MyNUnit
 {
     public static class MyNUnit
     {
-        private static ConcurrentDictionary<Type, ConcurrentQueue<MethodInfo>> methodsToTest;
+        private static ConcurrentDictionary<Type, ConcurrentQueue<MethodInfo>> methodsToTest = new ConcurrentDictionary<Type, ConcurrentQueue<MethodInfo>>();
 
         public static void RunTests(string path)
         {
-            var classes = GetClasses(path);
+            // Working
+            var classes = WorkingGetClasses(path);
 
-            foreach (var e in classes)
+            // Not working
+            foreach (var someClass in classes)
             {
-                QueueClassTests(e);
+                QueueClassTests(someClass);
             }
 
-            ExecuteAllTests();
+            // Not working
+            //var classes = GetClasses(path);
+            //
+            //foreach (var e in classes)
+            //{
+            //    QueueClassTests(e);
+            //}
+        }
+
+        private static IEnumerable<string> GetAssemblyPaths(string path)
+        {
+            return Directory.EnumerateFiles(path, "*.dll", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(path, "*.exe", SearchOption.AllDirectories));
         }
 
         private static IEnumerable<Type> GetClasses(string path)
         {
-            var files  = Directory.EnumerateFiles(path, "*.dll");
-            var classes = files.Select(Assembly.Load)
-                .SelectMany(a => a.ExportedTypes)
-                .Where(t => t.IsClass);
+            // Not working for some reason
+            return GetAssemblyPaths(path).Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass);
+        }
 
-            return classes;
+        private static List<Type> WorkingGetClasses(string path)
+        {
+            // Working pretty well
+            var res = new List<Type>();
+
+            foreach (var assemblyPath in GetAssemblyPaths(path))
+            {
+                foreach (var type in Assembly.LoadFrom(assemblyPath).ExportedTypes)
+                {
+                    if (type.IsClass)
+                    {
+                        Console.WriteLine(type.Name);
+                        res.Add(type);
+                    }
+                }
+            }
+
+            return res;
         }
 
         private static void QueueClassTests(Type t)
         {
-            foreach (var method in t.GetMethods())
+            foreach (var methodInfo in t.GetMethods())
             {
-                foreach (var attribute in method.GetCustomAttributes())
+                if (methodInfo.GetCustomAttributes<TestAttribute>().Count() != 0)
                 {
-                    if (attribute.GetType() == typeof(TestAttribute))
-                    {
-                        methodsToTest[t].Enqueue(method);
-                    }
+                    Console.WriteLine(methodInfo.Name); // No output from here
+                    methodsToTest[t].Enqueue(methodInfo);
                 }
             }
         }
@@ -56,14 +83,19 @@ namespace MyNUnit
             {
                 Parallel.ForEach(methodsToTest[key], method =>
                 {
-                    ExecuteTest(method);
+                    ExecuteTestMethod(key, method);
                 });
             });
         }
 
-        private static void ExecuteTest(MethodInfo method)
+        private static void ExecuteNonTestMethods()
         {
 
         }
+
+        private static void ExecuteTestMethod(Type type, MethodInfo method)
+        {
+        }
+        
     }
 }
