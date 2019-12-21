@@ -10,9 +10,9 @@ namespace MyNUnit
         /// </summary>
         static void Main(string[] args)
         {
-            var root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+            var root = AppDomain.CurrentDomain.BaseDirectory;
             
-            root = Path.Combine(root, "TestProjects\\TestResult\\bin");
+            root = Path.Combine(root, "..\\..\\..\\TestProjects\\TestResult\\bin");
             
             MyNUnit.RunTests(root);
         }
