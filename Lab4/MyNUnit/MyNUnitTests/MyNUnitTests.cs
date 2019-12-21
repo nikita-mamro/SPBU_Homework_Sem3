@@ -28,7 +28,7 @@ namespace MyNUnit.Tests
             expectedRegularResultsMethods.Add("FailException");
             expectedRegularResultsMethods.Add("UnexpectedException");
 
-            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\bin";
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
 
             var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
 
@@ -40,14 +40,14 @@ namespace MyNUnit.Tests
         [ExpectedException(typeof(AggregateException))]
         public void MethodsFormatTest()
         {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongFormatTest\\bin");
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongFormatTest\\Assembly");
         }
 
         [TestMethod]
         [ExpectedException(typeof(AggregateException))]
         public void MethodsParametersFormatTest()
         {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongParametersFormatTest\\bin");
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongParametersFormatTest\\Assembly");
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void BeforeAttributeTest()
         {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\bin");
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
             Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
             Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
         }
@@ -126,7 +126,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void AfterAttributeTest()
         {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\AfterTest\\bin");
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\AfterTest\\Assembly");
             Assert.AreEqual(3, AfterTest.AfterClassTests.TestValue);
             Assert.AreEqual(4, AfterTest.AfterTests.TestValue);
         }

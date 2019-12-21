@@ -10,7 +10,7 @@ namespace MyNUnit
         /// </summary>
         static void Main(string[] args)
         {
-            var root =  "..\\..\\..\\TestProjects\\TestResult\\bin";
+            var root = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
             
             MyNUnit.RunTests(root);
         }

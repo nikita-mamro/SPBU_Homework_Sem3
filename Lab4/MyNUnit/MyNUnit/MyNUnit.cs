@@ -73,14 +73,22 @@ namespace MyNUnit
         }
 
         /// <summary>
+        /// Получение сборок по заданному пути
+        /// </summary>
+        private static List<string> GetAssemblyPaths(string path)
+        {
+            var res = Directory.EnumerateFiles(path, "*.dll", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(path, "*.exe", SearchOption.AllDirectories)).ToList();
+            res.RemoveAll(assemblyPath => assemblyPath.Contains("\\MyNUnit.exe"));
+            return res;
+        }
+
+        /// <summary>
         /// Получение классов из сборок по заданному пути
         /// </summary>
         private static IEnumerable<Type> GetClasses(string path)
         {
-            var assemblies = Directory.GetFiles(path, "*.dll", SearchOption.AllDirectories).
-                Concat(Directory.GetFiles(path, "*.exe", SearchOption.AllDirectories)).ToList();
-            assemblies.RemoveAll(assemblyPath => assemblyPath.Contains("\\MyNUnit.exe") || assemblyPath.Contains("\\MyNUnit.dll"));
-            return assemblies.Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass);
+            return GetAssemblyPaths(path).Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass);
         }
 
         /// <summary>
