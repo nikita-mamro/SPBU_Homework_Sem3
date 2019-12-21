@@ -9,14 +9,44 @@ using System.Threading.Tasks;
 
 namespace MyNUnit.MyNUnitTools
 {
+    /// <summary>
+    /// Класс, реализующий множество всех методов, необходимых для тестирования выбранного класса
+    /// </summary>
     public class MethodsSet
     {
+        /// <summary>
+        /// Очередь из методов, помеченных аттрибутом BeforeClass
+        /// </summary>
+        /// <seealso cref="BeforeClassAttribute"/>
         public ConcurrentQueue<MethodInfo> BeforeClassTestMethods;
+
+        /// <summary>
+        /// Очередь из методов, помеченных аттрибутом Before
+        /// </summary>
+        /// <seealso cref="BeforeAttribute"/>
         public ConcurrentQueue<MethodInfo> BeforeTestMethods;
+
+        /// <summary>
+        /// Очередь из методов, помеченных аттрибутом Test
+        /// </summary>
+        /// <seealso cref="TestAttribute"/>
         public ConcurrentQueue<MethodInfo> TestMethods;
+
+        /// <summary>
+        /// Очередь из методов, помеченных аттрибутом After
+        /// </summary>
+        /// <seealso cref="AfterAttribute"/>
         public ConcurrentQueue<MethodInfo> AfterTestMethods;
+
+        /// <summary>
+        /// Очередь из методов, помеченных аттрибутом AfterClass
+        /// </summary>
+        /// <seealso cref="AfterClassAttribute"/>
         public ConcurrentQueue<MethodInfo> AfterClassTestMethods;
 
+        /// <summary>
+        /// Количество тестируемых методов
+        /// </summary>
         public int TestsCount
                 => TestMethods.Count;
 
@@ -31,11 +61,17 @@ namespace MyNUnit.MyNUnitTools
             QueueTestedClassMethods(type);
         }
 
+        /// <summary>
+        /// Проверка на то, подходит ли метод для тестирования
+        /// </summary>
         private bool IsMethodValid(MethodInfo method)
         {
             return method.GetParameters().Length == 0 && method.ReturnType == typeof(void);
         }
 
+        /// <summary>
+        /// Заполняет очереди методов для тестирования для переданного класса
+        /// </summary>
         public void QueueTestedClassMethods(Type type)
         {
             Parallel.ForEach(type.GetMethods(), method =>
@@ -73,6 +109,9 @@ namespace MyNUnit.MyNUnitTools
             });
         }
 
+        /// <summary>
+        /// Попытка добавить метод в очередь
+        /// </summary>
         private void TryToQueueMethod(MethodInfo method, ConcurrentQueue<MethodInfo> queue)
         {
             if (!IsMethodValid(method))

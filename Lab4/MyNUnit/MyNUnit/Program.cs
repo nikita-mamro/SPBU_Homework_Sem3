@@ -13,7 +13,7 @@ namespace MyNUnit
     {
         static void Main(string[] args)
         {
-            string root = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            var root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
             
             root = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
             

@@ -55,7 +55,7 @@ namespace MyNUnit
 
                 foreach (var beforeClassMethod in methodsToTest[type].BeforeClassTestMethods)
                 {
-                    //ExecuteNonTestMethod(type, beforeClassMethod);
+                    ExecuteNonTestMethod(type, beforeClassMethod, null);
                 }
 
                 foreach (var testMethod in methodsToTest[type].TestMethods)
@@ -65,7 +65,7 @@ namespace MyNUnit
 
                 foreach (var afterClassMethod in methodsToTest[type].AfterClassTestMethods)
                 {
-                    //ExecuteNonTestMethod(type, afterClassMethod);
+                    ExecuteNonTestMethod(type, afterClassMethod, null);
                 }
             });
         }
@@ -128,7 +128,7 @@ namespace MyNUnit
 
         private static void ExecuteNonTestMethod(Type type, MethodInfo method, object instance)
         {
-
+            method.Invoke(instance, null);
         }
         
         private static void PrintReport()
