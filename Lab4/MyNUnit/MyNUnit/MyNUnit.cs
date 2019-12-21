@@ -64,6 +64,8 @@ namespace MyNUnit
         {
             var res = new Dictionary<Type, List<TestInfo>>();
 
+            var lol = testResults;
+
             foreach (var type in testResults.Keys)
             {
                 res.Add(type, new List<TestInfo>());
