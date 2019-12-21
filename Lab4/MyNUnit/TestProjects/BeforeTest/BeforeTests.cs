@@ -1,5 +1,4 @@
 ﻿using MyNUnit.Attributes;
-using System.Threading;
 
 namespace BeforeTest
 {
@@ -8,24 +7,13 @@ namespace BeforeTest
     /// </summary>
     public class BeforeTests
     {
-        public static int TestValue = 0;
-
         [Before]
-        public void AddBefore()
-        {
-            ++TestValue;
-        }
+        public void AddBefore() { }
 
         [Test]
-        public void Test()
-        {
-            ++TestValue;
-        }
+        public void Test() { }
 
         [Test]
-        public void AnotherTest()
-        {
-            ++TestValue;
-        }
+        public void AnotherTest() { }
     }
 }

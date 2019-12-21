@@ -27,18 +27,6 @@ namespace MyNUnit.Tests
             expectedRegularResultsMethods.Add("ExpectedException");
             expectedRegularResultsMethods.Add("FailException");
             expectedRegularResultsMethods.Add("UnexpectedException");
-
-            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            foreach (var list in regularTestsReport.Values)
-            {
-                foreach (var info in list)
-                {
-                    regularTestsResults.Add(info);
-                }
-            }
         }
 
         [TestMethod]
@@ -58,6 +46,18 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void CorrectMethodsAreTestedTest()
         {
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
+
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
             var names = new List<string>();
 
             foreach (var res in regularTestsResults)
@@ -71,6 +71,18 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void RegularTestPassedTest()
         {
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
+
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
             var successInfo = regularTestsResults.Find(i => i.MethodName == "Success");
 
             Assert.IsTrue(successInfo.IsPassed);
@@ -79,6 +91,18 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void IgnoreTest()
         {
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
+
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
             var ignoreInfo = regularTestsResults.Find(i => i.MethodName == "Ignore");
             var exceptionIgnoreInfo = regularTestsResults.Find(i => i.MethodName == "IgnoreException");
 
@@ -90,45 +114,107 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void ExpectedExceptionTest()
         {
-            var info = regularTestsResults.Find(i => i.MethodName == "ExpectedException");
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
 
-            Assert.AreEqual(info.ExpectedException, info.TestException);
-            Assert.IsTrue(info.IsPassed);
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
+            var expectedInfo = regularTestsResults.Find(i => i.MethodName == "ExpectedException");
+
+            Assert.AreEqual(expectedInfo.ExpectedException, expectedInfo.TestException);
+            Assert.IsTrue(expectedInfo.IsPassed);
         }
 
         [TestMethod]
         public void FailExceptionTest()
         {
-            var info = regularTestsResults.Find(i => i.MethodName == "FailException");
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
 
-            Assert.AreEqual(null, info.ExpectedException);
-            Assert.AreNotEqual(null, info.TestException);
-            Assert.IsFalse(info.IsPassed);
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
+            var failInfo = regularTestsResults.Find(i => i.MethodName == "FailException");
+
+            Assert.AreEqual(null, failInfo.ExpectedException);
+            Assert.AreNotEqual(null, failInfo.TestException);
+            Assert.IsFalse(failInfo.IsPassed);
         }
 
         [TestMethod]
         public void UnexpectedExceptionTest()
         {
-            var info = regularTestsResults.Find(i => i.MethodName == "UnexpectedException");
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\Assembly";
 
-            Assert.AreNotEqual(info.TestException, info.ExpectedException);
-            Assert.IsFalse(info.IsPassed);
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
+
+            var exceptionInfo = regularTestsResults.Find(i => i.MethodName == "UnexpectedException");
+
+            Assert.AreNotEqual(exceptionInfo.TestException, exceptionInfo.ExpectedException);
+            Assert.IsFalse(exceptionInfo.IsPassed);
         }
 
-        //[TestMethod]
-        //public void BeforeAttributeTest()
-        //{
-        //    MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
-        //    Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
-        //    Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
-        //}
+        [TestMethod]
+        public void BeforeAttributeTest()
+        {
+            var reportBefore = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
+            Assert.AreEqual(2, reportBefore.Keys.Count);
+
+            var testedMethodsCount = 0;
+
+            foreach (var methodReports in reportBefore.Values)
+            {
+                foreach (var methodReport in methodReports)
+                {
+                    ++testedMethodsCount;
+                    Assert.IsTrue(methodReport.IsPassed);
+                }
+            }
+
+            Assert.AreEqual(4, testedMethodsCount);
+        }
 
         [TestMethod]
         public void AfterAttributeTest()
         {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\AfterTest\\Assembly");
-            Assert.AreEqual(3, AfterTest.AfterClassTests.TestValue);
-            Assert.AreEqual(4, AfterTest.AfterTests.TestValue);
+            
+            var reportAfter = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\AfterTest\\Assembly");
+
+            Assert.AreEqual(2, reportAfter.Keys.Count);
+
+            var testedMethodsCount = 0;
+
+            foreach (var methodReports in reportAfter.Values)
+            {
+                foreach (var methodReport in methodReports)
+                {
+                    ++testedMethodsCount;
+                    Assert.IsTrue(methodReport.IsPassed);
+                }
+            }
+
+            Assert.AreEqual(4, testedMethodsCount);
         }
     }
 }

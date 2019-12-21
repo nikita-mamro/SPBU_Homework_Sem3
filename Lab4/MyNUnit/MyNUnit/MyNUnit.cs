@@ -55,6 +55,9 @@ namespace MyNUnit
             ExecuteAllTests();
         }
 
+        /// <summary>
+        /// Получение отчёта о тестах
+        /// </summary>
         private static Dictionary<Type, List<TestInfo>> GetDictionaryOfReports()
         {
             var res = new Dictionary<Type, List<TestInfo>>();

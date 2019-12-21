@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNUnitTests", "..\MyNUnitT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestResult", "..\TestProjects\TestResult\TestResult.csproj", "{09C3B2C9-C401-4992-AD3D-FAAE5608E54E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeTest", "..\TestProjects\BeforeTest\BeforeTest.csproj", "{849D04B6-05F8-4054-929F-9DD19EB434B8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestProjects", "TestProjects", "{2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterTest", "..\TestProjects\AfterTest\AfterTest.csproj", "{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}"
@@ -18,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrongFormatTest", "..\TestProjects\WrongFormatTest\WrongFormatTest.csproj", "{F1225E86-61D3-4C7F-833A-760BC845EF0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrongParametersFormatTest", "..\TestProjects\WrongParametersFormatTest\WrongParametersFormatTest.csproj", "{80E045D3-FEF0-4648-BE68-B2B963BDDB13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeTest", "..\TestProjects\BeforeTest\BeforeTest.csproj", "{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,6 @@ Global
 		{09C3B2C9-C401-4992-AD3D-FAAE5608E54E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09C3B2C9-C401-4992-AD3D-FAAE5608E54E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09C3B2C9-C401-4992-AD3D-FAAE5608E54E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{849D04B6-05F8-4054-929F-9DD19EB434B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{849D04B6-05F8-4054-929F-9DD19EB434B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{849D04B6-05F8-4054-929F-9DD19EB434B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{849D04B6-05F8-4054-929F-9DD19EB434B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,16 +49,20 @@ Global
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{09C3B2C9-C401-4992-AD3D-FAAE5608E54E} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
-		{849D04B6-05F8-4054-929F-9DD19EB434B8} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 		{8B4DDAA6-B305-49C2-8A72-17935D6B27EC} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 		{F1225E86-61D3-4C7F-833A-760BC845EF0D} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
+		{D3E606DD-CCCB-47E1-9A3C-D7096211F4E7} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4C5357AE-1B10-43C3-BE58-24C2CF6DE9BD}

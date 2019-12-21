@@ -7,24 +7,13 @@ namespace BeforeTest
     /// </summary>
     public class BeforeClassTests
     {
-        public static int TestValue = 0;
-
         [BeforeClass]
-        public static void AddBeforeClass()
-        {
-            ++TestValue;
-        }
+        public static void AddBeforeClass() { }
 
         [Test]
-        public void Test()
-        {
-            ++TestValue;
-        }
+        public void Test() { }
 
         [Test]
-        public void AnotherTest()
-        {
-            ++TestValue;
-        }
+        public void AnotherTest() { }
     }
 }

@@ -7,24 +7,14 @@ namespace AfterTest
     /// </summary>
     public class AfterTests
     {
-        public static int TestValue = 0;
 
         [After]
-        public void AddAfter()
-        {
-            ++TestValue;
-        }
+        public void AddAfter() { }
 
         [Test]
-        public void Test()
-        {
-            ++TestValue;
-        }
+        public void Test() { }
 
         [Test]
-        public void AnotherTest()
-        {
-            ++TestValue;
-        }
+        public void AnotherTest() { }
     }
 }

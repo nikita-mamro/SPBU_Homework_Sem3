@@ -71,10 +71,6 @@
       <Project>{8b4ddaa6-b305-49c2-8a72-17935d6b27ec}</Project>
       <Name>AfterTest</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TestProjects\BeforeTest\BeforeTest.csproj">
-      <Project>{849d04b6-05f8-4054-929f-9dd19eb434b8}</Project>
-      <Name>BeforeTest</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TestProjects\TestResult\TestResult.csproj">
       <Project>{09c3b2c9-c401-4992-ad3d-faae5608e54e}</Project>
       <Name>TestResult</Name>
