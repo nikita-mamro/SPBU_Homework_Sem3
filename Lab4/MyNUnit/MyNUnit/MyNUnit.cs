@@ -16,17 +16,12 @@ namespace MyNUnit
         /// <summary>
         /// Методы для тестирования
         /// </summary>
-        private static ConcurrentDictionary<string, MethodsSet> methodsToTest = new ConcurrentDictionary<string, MethodsSet>();
-
-        /// <summary>
-        /// Словарь имён классов
-        /// </summary>
-        private static ConcurrentDictionary<string, Type> typesNames = new ConcurrentDictionary<string, Type>();
+        private static ConcurrentDictionary<Type, MethodsSet> methodsToTest = new ConcurrentDictionary<Type, MethodsSet>();
 
         /// <summary>
         /// Результаты тестов
         /// </summary>
-        private static ConcurrentDictionary<string, ConcurrentBag<TestInfo>> testResults = new ConcurrentDictionary<string, ConcurrentBag<TestInfo>>();
+        private static ConcurrentDictionary<Type, ConcurrentBag<TestInfo>> testResults = new ConcurrentDictionary<Type, ConcurrentBag<TestInfo>>();
 
         /// <summary>
         /// Запуск тестов с выводом результатов на экран
@@ -52,11 +47,6 @@ namespace MyNUnit
         {
             var classes = GetClasses(path);
 
-            foreach (var someClass in classes)
-            {
-                typesNames.TryAdd(someClass.Name, someClass);
-            }
-
             Parallel.ForEach(classes, someClass =>
             {
                 QueueClassTests(someClass);
@@ -69,13 +59,13 @@ namespace MyNUnit
         {
             var res = new Dictionary<Type, List<TestInfo>>();
 
-            foreach (var typeName in testResults.Keys)
+            foreach (var type in testResults.Keys)
             {
-                res.Add(typesNames[typeName], new List<TestInfo>());
+                res.Add(type, new List<TestInfo>());
 
-                foreach (var testInfo in testResults[typeName])
+                foreach (var testInfo in testResults[type])
                 {
-                    res[typesNames[typeName]].Add(testInfo);
+                    res[type].Add(testInfo);
                 }
             }
 
@@ -106,20 +96,7 @@ namespace MyNUnit
         /// </summary>
         private static void QueueClassTests(Type type)
         {
-            methodsToTest.TryAdd(GetTypeName(type), new MethodsSet(type));
-        }
-
-        private static string GetTypeName(Type type)
-        {
-            foreach (var key in typesNames.Keys)
-            {
-                if (typesNames[key] == type)
-                {
-                    return key;
-                }
-            }
-
-            throw new KeyNotFoundException();
+            methodsToTest.TryAdd(type, new MethodsSet(type));
         }
 
         /// <summary>
@@ -127,21 +104,21 @@ namespace MyNUnit
         /// </summary>
         private static void ExecuteAllTests()
         {
-            Parallel.ForEach(methodsToTest.Keys, typeName =>
+            Parallel.ForEach(methodsToTest.Keys, type =>
             {
-                testResults.TryAdd(typeName, new ConcurrentBag<TestInfo>());
+                testResults.TryAdd(type, new ConcurrentBag<TestInfo>());
 
-                foreach (var beforeClassMethod in methodsToTest[typeName].BeforeClassTestMethods)
+                foreach (var beforeClassMethod in methodsToTest[type].BeforeClassTestMethods)
                 {
                     ExecuteNonTestMethod(beforeClassMethod, null);
                 }
 
-                foreach (var testMethod in methodsToTest[typeName].TestMethods)
+                foreach (var testMethod in methodsToTest[type].TestMethods)
                 {
-                    ExecuteTestMethod(typesNames[typeName], testMethod);
+                    ExecuteTestMethod(type, testMethod);
                 }
 
-                foreach (var afterClassMethod in methodsToTest[typeName].AfterClassTestMethods)
+                foreach (var afterClassMethod in methodsToTest[type].AfterClassTestMethods)
                 {
                     ExecuteNonTestMethod(afterClassMethod, null);
                 }
@@ -169,11 +146,11 @@ namespace MyNUnit
             if (attribute.IsIgnored)
             {
                 isPassed = true;
-                testResults[GetTypeName(type)].Add(new TestInfo(method.Name, true, attribute.IgnoranceMessage));
+                testResults[type].Add(new TestInfo(method.Name, true, attribute.IgnoranceMessage));
                 return;
             }
 
-            foreach (var beforeTestMethod in methodsToTest[GetTypeName(type)].BeforeTestMethods)
+            foreach (var beforeTestMethod in methodsToTest[type].BeforeTestMethods)
             {
                 ExecuteNonTestMethod(beforeTestMethod, instance);
             }
@@ -205,10 +182,10 @@ namespace MyNUnit
             {
                 stopwatch.Stop();
                 var ellapsedTime = stopwatch.Elapsed;
-                testResults[GetTypeName(type)].Add(new TestInfo(method.Name, isPassed, attribute.ExpectedException, thrownException, ellapsedTime));
+                testResults[type].Add(new TestInfo(method.Name, isPassed, attribute.ExpectedException, thrownException, ellapsedTime));
             }
 
-            foreach (var afterTestMethod in methodsToTest[GetTypeName(type)].AfterTestMethods)
+            foreach (var afterTestMethod in methodsToTest[type].AfterTestMethods)
             {
                 ExecuteNonTestMethod(afterTestMethod, instance);
             }

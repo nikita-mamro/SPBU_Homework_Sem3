@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace MyNUnit.Tests
 {
@@ -12,14 +13,13 @@ namespace MyNUnit.Tests
     [TestClass]
     public class MyNUnitTests
     {
-        private string root;
         private List<TestInfo> regularTestsResults;
         private List<string> expectedRegularResultsMethods;
-        private List<TestInfo> exceptionResults;
 
         [TestInitialize]
         public void Initialize()
         {
+            regularTestsResults = new List<TestInfo>();
             expectedRegularResultsMethods = new List<string>();
             expectedRegularResultsMethods.Add("Success");
             expectedRegularResultsMethods.Add("Ignore");
@@ -32,8 +32,13 @@ namespace MyNUnit.Tests
 
             var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
 
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
+            foreach (var list in regularTestsReport.Values)
+            {
+                foreach (var info in list)
+                {
+                    regularTestsResults.Add(info);
+                }
+            }
         }
 
         [TestMethod]
@@ -60,11 +65,6 @@ namespace MyNUnit.Tests
                 names.Add(res.MethodName);
             }
 
-            foreach (var res in exceptionResults)
-            {
-                names.Add(res.MethodName);
-            }
-
             Assert.AreEqual(names.Intersect(expectedRegularResultsMethods).Count(), expectedRegularResultsMethods.Count);
         }
 
@@ -80,7 +80,7 @@ namespace MyNUnit.Tests
         public void IgnoreTest()
         {
             var ignoreInfo = regularTestsResults.Find(i => i.MethodName == "Ignore");
-            var exceptionIgnoreInfo = exceptionResults.Find(i => i.MethodName == "IgnoreException");
+            var exceptionIgnoreInfo = regularTestsResults.Find(i => i.MethodName == "IgnoreException");
 
             Assert.IsTrue(ignoreInfo.IsIgnored);
             Assert.AreEqual("Let's ignore this method", ignoreInfo.IgnoranceMessage);
@@ -90,7 +90,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void ExpectedExceptionTest()
         {
-            var info = exceptionResults.Find(i => i.MethodName == "ExpectedException");
+            var info = regularTestsResults.Find(i => i.MethodName == "ExpectedException");
 
             Assert.AreEqual(info.ExpectedException, info.TestException);
             Assert.IsTrue(info.IsPassed);
@@ -99,7 +99,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void FailExceptionTest()
         {
-            var info = exceptionResults.Find(i => i.MethodName == "FailException");
+            var info = regularTestsResults.Find(i => i.MethodName == "FailException");
 
             Assert.AreEqual(null, info.ExpectedException);
             Assert.AreNotEqual(null, info.TestException);
@@ -109,7 +109,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void UnexpectedExceptionTest()
         {
-            var info = exceptionResults.Find(i => i.MethodName == "UnexpectedException");
+            var info = regularTestsResults.Find(i => i.MethodName == "UnexpectedException");
 
             Assert.AreNotEqual(info.TestException, info.ExpectedException);
             Assert.IsFalse(info.IsPassed);
