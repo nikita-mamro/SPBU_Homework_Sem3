@@ -1,0 +1,18 @@
+language: csharp
+solution: Lab4\MyNUnit\MyNUnit\MyNUnit.sln
+sudo: required
+dist: xenial
+dotnet: 2.2
+
+before_build:
+  - nuget restore Lab4\MyNUnit\MyNUnit\MyNUnit.sln
+
+build:
+  - dotnet build Lab4\MyNUnit\MyNUnit\MyNUnit.sln
+
+script:
+  - dotnet test Lab4\MyNUnit\MyNUnit\MyNUnit.sln
+
+global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1 
