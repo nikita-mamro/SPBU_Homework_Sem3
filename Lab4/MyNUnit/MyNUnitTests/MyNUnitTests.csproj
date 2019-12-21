@@ -67,6 +67,22 @@
       <Project>{D3651B38-F1BA-41BD-BA78-CA295EDDF27F}</Project>
       <Name>MyNUnit</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TestProjects\AfterTest\AfterTest.csproj">
+      <Project>{8b4ddaa6-b305-49c2-8a72-17935d6b27ec}</Project>
+      <Name>AfterTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestProjects\BeforeTest\BeforeTest.csproj">
+      <Project>{849d04b6-05f8-4054-929f-9dd19eb434b8}</Project>
+      <Name>BeforeTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestProjects\TestResult\TestResult.csproj">
+      <Project>{09c3b2c9-c401-4992-ad3d-faae5608e54e}</Project>
+      <Name>TestResult</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestProjects\WrongFormatTest\WrongFormatTest.csproj">
+      <Project>{f1225e86-61d3-4c7f-833a-760bc845ef0d}</Project>
+      <Name>WrongFormatTest</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

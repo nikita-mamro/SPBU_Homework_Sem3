@@ -3,8 +3,7 @@
 namespace MyNUnit.Attributes
 {
     /// <summary>
-    /// Этим аттрибутом помечаются методы, 
-    /// которые должны быть протестированы
+    /// Этим аттрибутом помечаются тестовые методы
     /// </summary>
     public class TestAttribute : Attribute
     {

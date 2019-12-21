@@ -1,10 +1,7 @@
 ﻿using MyNUnit.Attributes;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MyNUnit.MyNUnitTools
@@ -116,7 +113,7 @@ namespace MyNUnit.MyNUnitTools
         {
             if (!IsMethodValid(method))
             {
-                throw new InvalidOperationException("Method shouldn't return value or get parameters");
+                throw new FormatException("Method shouldn't return value or get parameters");
             }
 
             queue.Enqueue(method);

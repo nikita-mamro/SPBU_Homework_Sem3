@@ -7,15 +7,43 @@ using System.IO;
 using System.Collections.Concurrent;
 using MyNUnit.Attributes;
 using MyNUnit.MyNUnitTools;
+using System.Diagnostics;
 
 namespace MyNUnit
 {
     public static class MyNUnit
     {
+        /// <summary>
+        /// Методы для тестирования
+        /// </summary>
         private static ConcurrentDictionary<Type, MethodsSet> methodsToTest = new ConcurrentDictionary<Type, MethodsSet>();
+
+        /// <summary>
+        /// Результаты тестов
+        /// </summary>
         private static ConcurrentDictionary<Type, ConcurrentBag<TestInfo>> testResults = new ConcurrentDictionary<Type, ConcurrentBag<TestInfo>>();
 
+        /// <summary>
+        /// Запуск тестов с выводом результатов на экран
+        /// </summary>
         public static void RunTests(string path)
+        {
+            ProceedPathAndExecuteTests(path);
+
+            PrintReport();
+        }
+
+        /// <summary>
+        /// Запуск тестов с сохранением результатов в виде словаря
+        /// </summary>
+        public static Dictionary<Type, List<TestInfo>> RunTestsAndGetReport(string path)
+        {
+            ProceedPathAndExecuteTests(path);
+
+            return GetDictionaryOfReports();
+        }
+
+        private static void ProceedPathAndExecuteTests(string path)
         {
             var classes = GetClasses(path);
 
@@ -25,10 +53,28 @@ namespace MyNUnit
             });
 
             ExecuteAllTests();
-
-            PrintReport();
         }
 
+        private static Dictionary<Type, List<TestInfo>> GetDictionaryOfReports()
+        {
+            var res = new Dictionary<Type, List<TestInfo>>();
+
+            foreach (var type in testResults.Keys)
+            {
+                res.Add(type, new List<TestInfo>());
+
+                foreach (var testInfo in testResults[type])
+                {
+                    res[type].Add(testInfo);
+                }
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// Получение сборок по заданному пути
+        /// </summary>
         private static List<string> GetAssemblyPaths(string path)
         {
             var res =  Directory.EnumerateFiles(path, "*.dll", SearchOption.AllDirectories)
@@ -37,16 +83,25 @@ namespace MyNUnit
             return res;
         }
 
+        /// <summary>
+        /// Получение классов из сборок по заданному пути
+        /// </summary>
         private static IEnumerable<Type> GetClasses(string path)
         {
             return GetAssemblyPaths(path).Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass);
         }
 
+        /// <summary>
+        /// Загрузка методов для тестирования переданного класса в очередь
+        /// </summary>
         private static void QueueClassTests(Type type)
         {
             methodsToTest.TryAdd(type, new MethodsSet(type));
         }
 
+        /// <summary>
+        /// Исполнение всех тестов
+        /// </summary>
         private static void ExecuteAllTests()
         {
             Parallel.ForEach(methodsToTest.Keys, type =>
@@ -55,7 +110,7 @@ namespace MyNUnit
 
                 foreach (var beforeClassMethod in methodsToTest[type].BeforeClassTestMethods)
                 {
-                    ExecuteNonTestMethod(type, beforeClassMethod, null);
+                    ExecuteNonTestMethod(beforeClassMethod, null);
                 }
 
                 foreach (var testMethod in methodsToTest[type].TestMethods)
@@ -65,11 +120,14 @@ namespace MyNUnit
 
                 foreach (var afterClassMethod in methodsToTest[type].AfterClassTestMethods)
                 {
-                    ExecuteNonTestMethod(type, afterClassMethod, null);
+                    ExecuteNonTestMethod(afterClassMethod, null);
                 }
             });
         }
 
+        /// <summary>
+        /// Исполение переданного тестового метода
+        /// </summary>
         private static void ExecuteTestMethod(Type type, MethodInfo method)
         {
             var attribute = method.GetCustomAttribute<TestAttribute>();
@@ -94,8 +152,11 @@ namespace MyNUnit
 
             foreach (var beforeTestMethod in methodsToTest[type].BeforeTestMethods)
             {
-                ExecuteNonTestMethod(type, beforeTestMethod, instance);
+                ExecuteNonTestMethod(beforeTestMethod, instance);
             }
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             try
             {
@@ -104,6 +165,7 @@ namespace MyNUnit
                 if (attribute.ExpectedException == null)
                 {
                     isPassed = true;
+                    stopwatch.Stop();
                 }
             }
             catch (Exception testException)
@@ -113,24 +175,33 @@ namespace MyNUnit
                 if (thrownException == attribute.ExpectedException)
                 {
                     isPassed = true;
+                    stopwatch.Stop();
                 }
             }
             finally
             {
-                testResults[type].Add(new TestInfo(method.Name, isPassed, attribute.ExpectedException, thrownException));
+                stopwatch.Stop();
+                var ellapsedTime = stopwatch.Elapsed;
+                testResults[type].Add(new TestInfo(method.Name, isPassed, attribute.ExpectedException, thrownException, ellapsedTime));
             }
 
-            foreach (var afterTestMethod in methodsToTest[type].AfterClassTestMethods)
+            foreach (var afterTestMethod in methodsToTest[type].AfterTestMethods)
             {
-                ExecuteNonTestMethod(type, afterTestMethod, instance);
+                ExecuteNonTestMethod(afterTestMethod, instance);
             }
         }
 
-        private static void ExecuteNonTestMethod(Type type, MethodInfo method, object instance)
+        /// <summary>
+        /// Исполнение метода, который требуется для тестирования, но не помеченного аттрибутом [Test]
+        /// </summary>
+        private static void ExecuteNonTestMethod(MethodInfo method, object instance)
         {
             method.Invoke(instance, null);
         }
         
+        /// <summary>
+        /// Распечатывает результаты тестирования
+        /// </summary>
         private static void PrintReport()
         {
             Console.WriteLine("Testing report:");
@@ -144,9 +215,7 @@ namespace MyNUnit
                 allMethodsCount += methodsToTest[testedClass].TestsCount;
             }
 
-            var lol = methodsToTest;
-
-            Console.WriteLine($"Found methods to test: {allMethodsCount}");
+            Console.WriteLine($"Found methods to test (total): {allMethodsCount}");
 
             foreach (var someClass in testResults.Keys)
             {
@@ -158,12 +227,12 @@ namespace MyNUnit
                 foreach (var testInfo in testResults[someClass])
                 {
                     Console.WriteLine("-----------------------------");
-                    Console.WriteLine($"Tested method: {testInfo.MethodName}");
+                    Console.WriteLine($"Tested method: {testInfo.MethodName}()");
 
                     if (testInfo.IsIgnored == true)
                     {
                         Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine($"Ignored with message: {testInfo.IgnoranceMessage}");
+                        Console.WriteLine($"Ignored {testInfo.MethodName}() with message: {testInfo.IgnoranceMessage}");
                         Console.ResetColor();
                         continue;
                     }
@@ -172,27 +241,40 @@ namespace MyNUnit
                     {
                         if (testInfo.ExpectedException == null)
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine($"Unexpected exception: {testInfo.TestException}");
                             Console.ResetColor();
                         }
                         else
                         {
+                            if (testInfo.ExpectedException == testInfo.TestException)
+                            {
+                                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                            }
+
                             Console.WriteLine($"Expected exception: {testInfo.ExpectedException}");
                             Console.WriteLine($"Thrown exception: {testInfo.TestException}");
+
+                            Console.ResetColor();
                         }
                     }
+
+                    Console.WriteLine($"Ellapsed time: {testInfo.Time}");
 
                     if (testInfo.IsPassed)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"Passed {testInfo.MethodName} test");
+                        Console.WriteLine($"Passed {testInfo.MethodName}() test");
                         Console.ResetColor();
                     }
                     else
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Failed {testInfo.MethodName} test");
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine($"Failed {testInfo.MethodName}() test");
                         Console.ResetColor();
                     }
                 }

@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{849D04B6-05F8-4054-929F-9DD19EB434B8}</ProjectGuid>
+    <ProjectGuid>{80E045D3-FEF0-4648-BE68-B2B963BDDB13}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>BeforeTest</RootNamespace>
-    <AssemblyName>BeforeTest</AssemblyName>
+    <RootNamespace>WrongParametersFormatTest</RootNamespace>
+    <AssemblyName>WrongParametersFormatTest</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,10 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BeforeClassTests.cs" />
-    <Compile Include="BeforeTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyNUnit
 {
@@ -12,7 +8,7 @@ namespace MyNUnit
     public class TestInfo
     {
         /// <summary>
-        /// Имя протестированного метода
+        /// Имя выполненного тестового метода
         /// </summary>
         public string MethodName { get; private set; }
 
@@ -41,6 +37,8 @@ namespace MyNUnit
         /// </summary>
         public string IgnoranceMessage { get; private set; } = "";
 
+        public TimeSpan Time { get; private set; }
+
         /// <summary>
         /// Конструктор для создания отчёта о проигнорированном методе
         /// </summary>
@@ -52,14 +50,15 @@ namespace MyNUnit
         }
 
         /// <summary>
-        /// Конструктор для создания отчёта о протестирванном методе
+        /// Конструктор для создания отчёта о выполненном тестовом методе
         /// </summary>
-        public TestInfo(string name, bool isPassed, Type expectedException, Type thrownException) 
+        public TestInfo(string name, bool isPassed, Type expectedException, Type thrownException, TimeSpan time) 
         {
             MethodName = name;
             IsPassed = isPassed;
             ExpectedException = expectedException;
             TestException = thrownException;
+            Time = time;
         }
     }
 }
