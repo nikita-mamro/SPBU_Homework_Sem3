@@ -1,10 +1,11 @@
-image: Visual Studio 2019
+image: Visual Studio 2017
 
 environment:
   matrix:
   - solution_path: Lab1\Lazy\Lazy.sln
   - solution_path: Lab2\MyThreadPool\MyThreadPool.sln
   - solution_path: Lab3\SimpleFTP\SimpleFTP\SimpleFTP.sln
+  - solution_path: Lab4\MyNUnit\MyNUnit\MyNUnit.sln
 
 before_build:
   - nuget restore %solution_path%
