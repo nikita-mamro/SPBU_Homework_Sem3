@@ -115,13 +115,13 @@ namespace MyNUnit.Tests
             Assert.IsFalse(info.IsPassed);
         }
 
-        [TestMethod]
-        public void BeforeAttributeTest()
-        {
-            MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
-            Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
-            Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
-        }
+        //[TestMethod]
+        //public void BeforeAttributeTest()
+        //{
+        //    MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
+        //    Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
+        //    Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
+        //}
 
         [TestMethod]
         public void AfterAttributeTest()
