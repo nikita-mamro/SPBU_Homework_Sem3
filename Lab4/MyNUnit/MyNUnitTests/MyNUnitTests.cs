@@ -28,9 +28,7 @@ namespace MyNUnit.Tests
             expectedRegularResultsMethods.Add("FailException");
             expectedRegularResultsMethods.Add("UnexpectedException");
 
-            root = AppDomain.CurrentDomain.BaseDirectory;
-
-            var resultsTestPath = Path.Combine(root, "..\\..\\..\\TestProjects\\TestResult\\bin");
+            var resultsTestPath = "..\\..\\..\\TestProjects\\TestResult\\bin";
 
             var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
 
@@ -42,14 +40,14 @@ namespace MyNUnit.Tests
         [ExpectedException(typeof(AggregateException))]
         public void MethodsFormatTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "..\\..\\..\\TestProjects\\WrongFormatTest\\bin"));
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongFormatTest\\bin");
         }
 
         [TestMethod]
         [ExpectedException(typeof(AggregateException))]
         public void MethodsParametersFormatTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "..\\..\\..\\TestProjects\\WrongParametersFormatTest\\bin"));
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\WrongParametersFormatTest\\bin");
         }
 
         [TestMethod]
@@ -120,7 +118,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void BeforeAttributeTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "..\\..\\..\\TestProjects\\BeforeTest\\bin"));
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\BeforeTest\\bin");
             Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
             Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
         }
@@ -128,7 +126,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void AfterAttributeTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "..\\..\\..\\TestProjects\\AfterTest\\bin"));
+            MyNUnit.RunTests("..\\..\\..\\TestProjects\\AfterTest\\bin");
             Assert.AreEqual(3, AfterTest.AfterClassTests.TestValue);
             Assert.AreEqual(4, AfterTest.AfterTests.TestValue);
         }
