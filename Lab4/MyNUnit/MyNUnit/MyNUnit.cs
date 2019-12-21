@@ -52,6 +52,8 @@ namespace MyNUnit
                 QueueClassTests(someClass);
             });
 
+            var lol = methodsToTest;
+
             ExecuteAllTests();
         }
 

@@ -179,7 +179,6 @@ namespace MyNUnit.Tests
         public void BeforeAttributeTest()
         {
             var reportBefore = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
-            Assert.AreEqual(2, reportBefore.Keys.Count);
 
             var testedMethodsCount = 0;
 
@@ -200,8 +199,6 @@ namespace MyNUnit.Tests
         {
             
             var reportAfter = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\AfterTest\\Assembly");
-
-            Assert.AreEqual(2, reportAfter.Keys.Count);
 
             var testedMethodsCount = 0;
 
