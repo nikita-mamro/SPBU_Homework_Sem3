@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace MyNUnit.Tests
 {
@@ -176,28 +177,9 @@ namespace MyNUnit.Tests
         }
 
         [TestMethod]
-        public void BeforeAttributeTest()
+        public void AfterBeforeAttributeTest()
         {
-            var reportBefore = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\BeforeTest\\Assembly");
-
-            var testedMethodsCount = 0;
-
-            foreach (var methodReports in reportBefore.Values)
-            {
-                foreach (var methodReport in methodReports)
-                {
-                    ++testedMethodsCount;
-                }
-            }
-
-            Assert.AreEqual(4, testedMethodsCount);
-        }
-
-        [TestMethod]
-        public void AfterAttributeTest()
-        {
-            
-            var reportAfter = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\AfterTest\\Assembly");
+            var reportAfter = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\BeforeAfterTest\\Assembly");
 
             var testedMethodsCount = 0;
 
@@ -209,7 +191,7 @@ namespace MyNUnit.Tests
                 }
             }
 
-            Assert.AreEqual(4, testedMethodsCount);
+            Assert.AreEqual(2, testedMethodsCount);
         }
     }
 }

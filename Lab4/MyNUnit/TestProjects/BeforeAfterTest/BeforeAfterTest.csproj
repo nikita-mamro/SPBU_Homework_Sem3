@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8B4DDAA6-B305-49C2-8A72-17935D6B27EC}</ProjectGuid>
+    <ProjectGuid>{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>AfterTest</RootNamespace>
-    <AssemblyName>AfterTest</AssemblyName>
+    <RootNamespace>BeforeAfterTest</RootNamespace>
+    <AssemblyName>BeforeAfterTest</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -46,8 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AfterClassTests.cs" />
-    <Compile Include="AfterTests.cs" />
+    <Compile Include="BeforeAfterTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
