@@ -175,23 +175,5 @@ namespace MyNUnit.Tests
             Assert.AreNotEqual(exceptionInfo.TestException, exceptionInfo.ExpectedException);
             Assert.IsFalse(exceptionInfo.IsPassed);
         }
-
-        [TestMethod]
-        public void AfterBeforeAttributeTest()
-        {
-            var reportAfter = MyNUnit.RunTestsAndGetReport("..\\..\\..\\TestProjects\\BeforeAfterTest\\Assembly");
-
-            var testedMethodsCount = 0;
-
-            foreach (var methodReports in reportAfter.Values)
-            {
-                foreach (var methodReport in methodReports)
-                {
-                    ++testedMethodsCount;
-                }
-            }
-
-            Assert.AreEqual(2, testedMethodsCount);
-        }
     }
 }

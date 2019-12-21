@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrongFormatTest", "..\TestP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrongParametersFormatTest", "..\TestProjects\WrongParametersFormatTest\WrongParametersFormatTest.csproj", "{80E045D3-FEF0-4648-BE68-B2B963BDDB13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeforeAfterTest", "..\TestProjects\BeforeAfterTest\BeforeAfterTest.csproj", "{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +41,6 @@ Global
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A244BA2-D447-4DB8-8B1A-F8992A1F150A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,7 +49,6 @@ Global
 		{09C3B2C9-C401-4992-AD3D-FAAE5608E54E} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 		{F1225E86-61D3-4C7F-833A-760BC845EF0D} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 		{80E045D3-FEF0-4648-BE68-B2B963BDDB13} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
-		{1A244BA2-D447-4DB8-8B1A-F8992A1F150A} = {2EE01CAB-E7A9-4251-AAB5-AA51B44D48E1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4C5357AE-1B10-43C3-BE58-24C2CF6DE9BD}
