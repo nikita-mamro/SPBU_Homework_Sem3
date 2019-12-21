@@ -28,9 +28,9 @@ namespace MyNUnit.Tests
             expectedRegularResultsMethods.Add("FailException");
             expectedRegularResultsMethods.Add("UnexpectedException");
 
-            root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
 
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
+            var resultsTestPath = Path.Combine(root, "TestProjects\\TestResult\\bin");
 
             var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
 
@@ -42,14 +42,14 @@ namespace MyNUnit.Tests
         [ExpectedException(typeof(AggregateException))]
         public void MethodsFormatTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "MyNUnit\\TestProjects\\WrongFormatTest\\bin"));
+            MyNUnit.RunTests(Path.Combine(root, "TestProjects\\WrongFormatTest\\bin"));
         }
 
         [TestMethod]
         [ExpectedException(typeof(AggregateException))]
         public void MethodsParametersFormatTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "MyNUnit\\TestProjects\\WrongParametersFormatTest\\bin"));
+            MyNUnit.RunTests(Path.Combine(root, "TestProjects\\WrongParametersFormatTest\\bin"));
         }
 
         [TestMethod]
@@ -120,7 +120,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void BeforeAttributeTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "MyNUnit\\TestProjects\\BeforeTest\\bin"));
+            MyNUnit.RunTests(Path.Combine(root, "TestProjects\\BeforeTest\\bin"));
             Assert.AreEqual(3, BeforeTest.BeforeClassTests.TestValue);
             Assert.AreEqual(4, BeforeTest.BeforeTests.TestValue);
         }
@@ -128,7 +128,7 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void AfterAttributeTest()
         {
-            MyNUnit.RunTests(Path.Combine(root, "MyNUnit\\TestProjects\\AfterTest\\bin"));
+            MyNUnit.RunTests(Path.Combine(root, "TestProjects\\AfterTest\\bin"));
             Assert.AreEqual(3, AfterTest.AfterClassTests.TestValue);
             Assert.AreEqual(4, AfterTest.AfterTests.TestValue);
         }
