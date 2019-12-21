@@ -37,6 +37,9 @@ namespace MyNUnit
         /// </summary>
         public string IgnoranceMessage { get; private set; } = "";
 
+        /// <summary>
+        /// Время, затраченное на тест
+        /// </summary>
         public TimeSpan Time { get; private set; }
 
         /// <summary>

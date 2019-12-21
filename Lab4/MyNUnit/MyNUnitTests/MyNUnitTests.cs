@@ -29,6 +29,13 @@ namespace MyNUnit.Tests
             expectedRegularResultsMethods.Add("UnexpectedException");
 
             root = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+
+            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
+
+            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
+
+            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
+            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
         }
 
         [TestMethod]
@@ -48,13 +55,6 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void CorrectMethodsAreTestedTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var names = new List<string>();
 
             foreach (var res in regularTestsResults)
@@ -73,27 +73,14 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void RegularTestPassedTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var successInfo = regularTestsResults.Find(i => i.MethodName == "Success");
+
             Assert.IsTrue(successInfo.IsPassed);
         }
 
         [TestMethod]
         public void IgnoreTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var ignoreInfo = regularTestsResults.Find(i => i.MethodName == "Ignore");
             var exceptionIgnoreInfo = exceptionResults.Find(i => i.MethodName == "IgnoreException");
 
@@ -105,13 +92,6 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void ExpectedExceptionTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var info = exceptionResults.Find(i => i.MethodName == "ExpectedException");
 
             Assert.AreEqual(info.ExpectedException, info.TestException);
@@ -121,14 +101,8 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void FailExceptionTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var info = exceptionResults.Find(i => i.MethodName == "FailException");
+
             Assert.AreEqual(null, info.ExpectedException);
             Assert.AreNotEqual(null, info.TestException);
             Assert.IsFalse(info.IsPassed);
@@ -137,13 +111,6 @@ namespace MyNUnit.Tests
         [TestMethod]
         public void UnexpectedExceptionTest()
         {
-            var resultsTestPath = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
-
-            var regularTestsReport = MyNUnit.RunTestsAndGetReport(resultsTestPath);
-
-            regularTestsResults = regularTestsReport[typeof(TestResult.Tests)];
-            exceptionResults = regularTestsReport[typeof(TestResult.ExceptionTests)];
-
             var info = exceptionResults.Find(i => i.MethodName == "UnexpectedException");
 
             Assert.AreNotEqual(info.TestException, info.ExpectedException);
