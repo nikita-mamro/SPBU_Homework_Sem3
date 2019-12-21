@@ -15,7 +15,7 @@ namespace MyNUnit
         {
             string root = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
             
-            root = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult");
+            root = Path.Combine(root, "MyNUnit\\TestProjects\\TestResult\\bin");
             
             MyNUnit.RunTests(root);
         }

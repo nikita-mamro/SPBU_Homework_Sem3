@@ -4,15 +4,15 @@ namespace MyNUnit.Attributes
 {
     public class TestAttribute : Attribute
     {
-        public Type Exception { get; private set; }
-        public string CancellationMessage { get; private set; }
-        public bool IsCanceled
-            => CancellationMessage == "";
+        public Type ExpectedException { get; private set; }
+        public string IgnoranceMessage { get; private set; }
+        public bool IsIgnored
+            => IgnoranceMessage != "";
 
         public TestAttribute(string ignore = "", Type expected = null)
         {
-            Exception = expected;
-            CancellationMessage = ignore;
+            ExpectedException = expected;
+            IgnoranceMessage = ignore;
         }
     }
 }

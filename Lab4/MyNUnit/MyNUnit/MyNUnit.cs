@@ -6,96 +6,199 @@ using System.Reflection;
 using System.IO;
 using System.Collections.Concurrent;
 using MyNUnit.Attributes;
+using MyNUnit.MyNUnitTools;
 
 namespace MyNUnit
 {
     public static class MyNUnit
     {
-        private static ConcurrentDictionary<Type, ConcurrentQueue<MethodInfo>> methodsToTest = new ConcurrentDictionary<Type, ConcurrentQueue<MethodInfo>>();
+        private static ConcurrentDictionary<Type, MethodsSet> methodsToTest = new ConcurrentDictionary<Type, MethodsSet>();
+        private static ConcurrentDictionary<Type, ConcurrentBag<TestInfo>> testResults = new ConcurrentDictionary<Type, ConcurrentBag<TestInfo>>();
 
         public static void RunTests(string path)
         {
-            // Working
-            var classes = WorkingGetClasses(path);
+            var classes = GetClasses(path);
 
-            // Not working
-            foreach (var someClass in classes)
+            Parallel.ForEach(classes, someClass =>
             {
                 QueueClassTests(someClass);
-            }
+            });
 
-            // Not working
-            //var classes = GetClasses(path);
-            //
-            //foreach (var e in classes)
-            //{
-            //    QueueClassTests(e);
-            //}
+            ExecuteAllTests();
+
+            PrintReport();
         }
 
-        private static IEnumerable<string> GetAssemblyPaths(string path)
+        private static List<string> GetAssemblyPaths(string path)
         {
-            return Directory.EnumerateFiles(path, "*.dll", SearchOption.AllDirectories)
-                .Concat(Directory.EnumerateFiles(path, "*.exe", SearchOption.AllDirectories));
+            var res =  Directory.EnumerateFiles(path, "*.dll", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(path, "*.exe", SearchOption.AllDirectories)).ToList();
+            res.RemoveAll(assemblyPath => assemblyPath.Contains("\\MyNUnit.exe"));
+            return res;
         }
 
         private static IEnumerable<Type> GetClasses(string path)
         {
-            // Not working for some reason
             return GetAssemblyPaths(path).Select(Assembly.LoadFrom).SelectMany(a => a.ExportedTypes).Where(t => t.IsClass);
         }
 
-        private static List<Type> WorkingGetClasses(string path)
+        private static void QueueClassTests(Type type)
         {
-            // Working pretty well
-            var res = new List<Type>();
-
-            foreach (var assemblyPath in GetAssemblyPaths(path))
-            {
-                foreach (var type in Assembly.LoadFrom(assemblyPath).ExportedTypes)
-                {
-                    if (type.IsClass)
-                    {
-                        Console.WriteLine(type.Name);
-                        res.Add(type);
-                    }
-                }
-            }
-
-            return res;
-        }
-
-        private static void QueueClassTests(Type t)
-        {
-            foreach (var methodInfo in t.GetMethods())
-            {
-                if (methodInfo.GetCustomAttributes<TestAttribute>().Count() != 0)
-                {
-                    Console.WriteLine(methodInfo.Name); // No output from here
-                    methodsToTest[t].Enqueue(methodInfo);
-                }
-            }
+            methodsToTest.TryAdd(type, new MethodsSet(type));
         }
 
         private static void ExecuteAllTests()
         {
-            Parallel.ForEach(methodsToTest.Keys, key =>
+            Parallel.ForEach(methodsToTest.Keys, type =>
             {
-                Parallel.ForEach(methodsToTest[key], method =>
+                testResults.TryAdd(type, new ConcurrentBag<TestInfo>());
+
+                foreach (var beforeClassMethod in methodsToTest[type].BeforeClassTestMethods)
                 {
-                    ExecuteTestMethod(key, method);
-                });
+                    //ExecuteNonTestMethod(type, beforeClassMethod);
+                }
+
+                foreach (var testMethod in methodsToTest[type].TestMethods)
+                {
+                    ExecuteTestMethod(type, testMethod);
+                }
+
+                foreach (var afterClassMethod in methodsToTest[type].AfterClassTestMethods)
+                {
+                    //ExecuteNonTestMethod(type, afterClassMethod);
+                }
             });
-        }
-
-        private static void ExecuteNonTestMethods()
-        {
-
         }
 
         private static void ExecuteTestMethod(Type type, MethodInfo method)
         {
+            var attribute = method.GetCustomAttribute<TestAttribute>();
+            var isPassed = false;
+            Type thrownException = null;
+
+            var emptyConstructor = type.GetConstructor(Type.EmptyTypes);
+
+            if (emptyConstructor == null)
+            {
+                throw new FormatException($"{type.Name} must have parameterless constructor");
+            }
+
+            var instance = emptyConstructor.Invoke(null);
+
+            if (attribute.IsIgnored)
+            {
+                isPassed = true;
+                testResults[type].Add(new TestInfo(method.Name, true, attribute.IgnoranceMessage));
+                return;
+            }
+
+            foreach (var beforeTestMethod in methodsToTest[type].BeforeTestMethods)
+            {
+                ExecuteNonTestMethod(type, beforeTestMethod, instance);
+            }
+
+            try
+            {
+                method.Invoke(instance, null);
+
+                if (attribute.ExpectedException == null)
+                {
+                    isPassed = true;
+                }
+            }
+            catch (Exception testException)
+            {
+                thrownException = testException.InnerException.GetType();
+
+                if (thrownException == attribute.ExpectedException)
+                {
+                    isPassed = true;
+                }
+            }
+            finally
+            {
+                testResults[type].Add(new TestInfo(method.Name, isPassed, attribute.ExpectedException, thrownException));
+            }
+
+            foreach (var afterTestMethod in methodsToTest[type].AfterClassTestMethods)
+            {
+                ExecuteNonTestMethod(type, afterTestMethod, instance);
+            }
+        }
+
+        private static void ExecuteNonTestMethod(Type type, MethodInfo method, object instance)
+        {
+
         }
         
+        private static void PrintReport()
+        {
+            Console.WriteLine("Testing report:");
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine($"Found classes to test: {methodsToTest.Keys.Count}");
+
+            var allMethodsCount = 0;
+
+            foreach (var testedClass in methodsToTest.Keys)
+            {
+                allMethodsCount += methodsToTest[testedClass].TestsCount;
+            }
+
+            var lol = methodsToTest;
+
+            Console.WriteLine($"Found methods to test: {allMethodsCount}");
+
+            foreach (var someClass in testResults.Keys)
+            {
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine($"Class: {someClass.Name}");
+
+                var test = testResults;
+
+                foreach (var testInfo in testResults[someClass])
+                {
+                    Console.WriteLine("-----------------------------");
+                    Console.WriteLine($"Tested method: {testInfo.MethodName}");
+
+                    if (testInfo.IsIgnored == true)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine($"Ignored with message: {testInfo.IgnoranceMessage}");
+                        Console.ResetColor();
+                        continue;
+                    }
+
+                    if (testInfo.ExpectedException != null || testInfo.TestException != null)
+                    {
+                        if (testInfo.ExpectedException == null)
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.WriteLine($"Unexpected exception: {testInfo.TestException}");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Expected exception: {testInfo.ExpectedException}");
+                            Console.WriteLine($"Thrown exception: {testInfo.TestException}");
+                        }
+                    }
+
+                    if (testInfo.IsPassed)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Passed {testInfo.MethodName} test");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Failed {testInfo.MethodName} test");
+                        Console.ResetColor();
+                    }
+                }
+            }
+
+            Console.WriteLine("-----------------------------");
+        }
     }
 }

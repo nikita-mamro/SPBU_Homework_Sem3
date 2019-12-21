@@ -49,8 +49,10 @@
     <Compile Include="Attributes\BeforeClassAttribute.cs" />
     <Compile Include="Attributes\TestAttribute.cs" />
     <Compile Include="MyNUnit.cs" />
+    <Compile Include="MyNUnitTools\MethodsSet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MyNUnitTools\TestInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
