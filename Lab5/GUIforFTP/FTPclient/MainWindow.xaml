@@ -1,0 +1,48 @@
+﻿<Window x:Class="FTPclient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FTPclient"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Column="0" Grid.Row="0" Name="backButton" Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="40" Click="Back_Click"/>
+        <Button Grid.Column="0" Grid.Row="0" Name="downloadAllButton" Content="Download All" HorizontalAlignment="Right" VerticalAlignment="Top" Width="200" Height="40"/>
+
+        <ScrollViewer Grid.Column="0" Grid.Row="1">
+            <ListView x:Name="filesAndFoldersListView">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <EventSetter Event="MouseDoubleClick" Handler="HandleDoubleClick"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </ScrollViewer>
+
+        <Button Grid.Column="1" Grid.Row="1" Name="connectButton" Content="Connect" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="200" Height="40" Click="Connect_Click"/>
+
+        <Grid Grid.Column="1" Grid.Row="1" Name="AddressPortGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            
+            <Label Grid.Row="0" Content="Address" HorizontalAlignment="Center"  VerticalAlignment="Top" FontSize="30"/>
+            <TextBox Grid.Row="0" Name="addressTextBox" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Address}" Width="200" VerticalAlignment="Center" FontSize="30"/>
+
+            <Label Grid.Row="1" Content="Port" HorizontalAlignment="Center"  VerticalAlignment="Top" FontSize="30"/>
+            <TextBox Grid.Row="1" Name="portTextBox" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Port}" Width="200" VerticalAlignment="Center" FontSize="30"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29521.150
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTPclient", "FTPclient.csproj", "{F07BC91C-2491-4B30-B100-04764309F24B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "..\Client\Client.csproj", "{20BA515E-3D9C-44B7-AAF6-182BE9FA4E36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "..\Server\Server.csproj", "{1A84A57A-8C77-4D91-B2BB-29F756FC5344}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F07BC91C-2491-4B30-B100-04764309F24B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F07BC91C-2491-4B30-B100-04764309F24B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F07BC91C-2491-4B30-B100-04764309F24B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F07BC91C-2491-4B30-B100-04764309F24B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20BA515E-3D9C-44B7-AAF6-182BE9FA4E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20BA515E-3D9C-44B7-AAF6-182BE9FA4E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20BA515E-3D9C-44B7-AAF6-182BE9FA4E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20BA515E-3D9C-44B7-AAF6-182BE9FA4E36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {60F18BBE-F5F3-42D1-99A0-A2BA2A6AFE54}
+	EndGlobalSection
+EndGlobal
