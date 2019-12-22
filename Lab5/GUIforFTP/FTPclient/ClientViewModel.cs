@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FTPClient;
+using Microsoft.Win32;
 
 namespace ViewModel
 {
@@ -24,7 +23,7 @@ namespace ViewModel
         public string CurrentDirectory;
         public string PreviousDirectory;
 
-        public string DownloadDirectory;
+        private string сurrentDirectoryOnServer;
 
         private ObservableCollection<string> currentPaths;
 
@@ -57,13 +56,14 @@ namespace ViewModel
                 => server = value;
         }
 
-        public ClientViewModel(string server, int port)
+        public ClientViewModel()
         {
-            this.port = port;
-            this.server = server;
+            this.server = "127.0.0.1";
+            this.port = 8888;
             RootServerDirectory = "..\\..\\..\\Server\\res";
-            RootClientDirectory = "..\\..\\..\\Client\\res\\Downloads";
+            RootClientDirectory = "..\\..\\..\\Client\\res\\Downloads\\";
             CurrentDirectory = RootServerDirectory;
+            сurrentDirectoryOnServer = "";
             PreviousDirectory = null;
 
             DisplayedList = new ObservableCollection<string>();
@@ -111,9 +111,12 @@ namespace ViewModel
                 }
             }
 
-            foreach (var item in e.NewItems)
+            if (e.NewItems != null)
             {
-                DisplayedList.Add(item.ToString());
+                foreach (var item in e.NewItems)
+                {
+                    DisplayedList.Add(item.ToString());
+                }
             }
         }
 
@@ -125,8 +128,9 @@ namespace ViewModel
             {
                 try
                 {
-                    await TryUpdateCurrentPaths(folderName);
+                    await TryUpdateCurrentPaths(Path.Combine(сurrentDirectoryOnServer, folderName));
                     CurrentDirectory = nextDirectory;
+                    сurrentDirectoryOnServer = Path.Combine(сurrentDirectoryOnServer, folderName);
                 }
                 catch (Exception e)
                 {
@@ -135,7 +139,14 @@ namespace ViewModel
             }
             else
             {
-                ErrorHandler.Invoke(this, "TODO:downloadfile");
+                try
+                {
+                    await DownloadFile(folderName);
+                }
+                catch (Exception e)
+                {
+                    ErrorHandler.Invoke(this, e.Message);
+                }
             }
         }
 
@@ -150,8 +161,9 @@ namespace ViewModel
 
             foreach (var path in serverList)
             {
-                var isFolder = path.Item2;
-                var name = path.Item1.Replace("\\", string.Empty).Remove(0, 1);
+                var name = path.Item1;
+
+                name = name.Substring(name.LastIndexOf('\\') + 1);
 
                 currentPaths.Add(name);
             }
@@ -159,12 +171,50 @@ namespace ViewModel
 
         public async Task GoBack()
         {
-            await TryUpdateCurrentPaths("");
+            if (сurrentDirectoryOnServer == "")
+            {
+                return;
+            }
+
+            try
+            {
+                var index = сurrentDirectoryOnServer.LastIndexOf('\\');
+                string toOpen;
+
+                if (index > 0)
+                {
+                    toOpen = сurrentDirectoryOnServer.Substring(0, сurrentDirectoryOnServer.LastIndexOf('\\'));
+                }
+                else
+                {
+                    toOpen = "";
+                }
+
+                await TryUpdateCurrentPaths(toOpen);
+                сurrentDirectoryOnServer = toOpen;
+                CurrentDirectory = Directory.GetParent(CurrentDirectory).ToString();
+            }
+            catch (Exception e)
+            {
+                if (e.Message == "-1")
+                {
+                    ErrorHandler.Invoke(this, "Directory not found exception occured");
+                    return;
+                }
+
+                ErrorHandler.Invoke(this, e.Message);
+            }
         }
 
         public async Task DownloadFile(string fileName)
         {
+            var pathToFile = Path.Combine(сurrentDirectoryOnServer, fileName);
 
+            //await client.Get(pathToFile, RootClientDirectory);
+        }
+
+        public async Task DownloadAllFilesInCurrentDirectory()
+        {
         }
     }
 }

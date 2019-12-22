@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
@@ -18,7 +19,7 @@
         </Grid.ColumnDefinitions>
 
         <Button Grid.Column="0" Grid.Row="0" Name="backButton" Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Height="40" Click="Back_Click"/>
-        <Button Grid.Column="0" Grid.Row="0" Name="downloadAllButton" Content="Download All" HorizontalAlignment="Right" VerticalAlignment="Top" Width="200" Height="40"/>
+        <Button Grid.Column="0" Grid.Row="0" Name="downloadAllButton" Content="Download All" HorizontalAlignment="Right" VerticalAlignment="Top" Width="200" Height="40" Click="DownloadAll_Click"/>
 
         <ScrollViewer Grid.Column="0" Grid.Row="1">
             <ListView x:Name="filesAndFoldersListView">

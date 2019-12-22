@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ViewModel;
 
 namespace FTPclient
@@ -25,7 +13,7 @@ namespace FTPclient
 
         public MainWindow()
         {
-            model = new ClientViewModel("127.0.0.1", 8888);
+            model = new ClientViewModel();
             model.ErrorHandler += ShowMessage;
 
             InitializeComponent();
@@ -53,6 +41,11 @@ namespace FTPclient
         private async void Back_Click(object sender, RoutedEventArgs e)
         {
             await model.GoBack();
+        }
+
+        private async void DownloadAll_Click(object sender, RoutedEventArgs e)
+        {
+            await model.DownloadAllFilesInCurrentDirectory();
         }
     }
 }
