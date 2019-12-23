@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "..\Client\Client.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "..\Server\Server.csproj", "{1A84A57A-8C77-4D91-B2BB-29F756FC5344}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTPclientTests", "..\FTPclientTests\FTPclientTests.csproj", "{ABC715EA-1D49-47CF-B56D-C64B30A8CC39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A84A57A-8C77-4D91-B2BB-29F756FC5344}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABC715EA-1D49-47CF-B56D-C64B30A8CC39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABC715EA-1D49-47CF-B56D-C64B30A8CC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABC715EA-1D49-47CF-B56D-C64B30A8CC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABC715EA-1D49-47CF-B56D-C64B30A8CC39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

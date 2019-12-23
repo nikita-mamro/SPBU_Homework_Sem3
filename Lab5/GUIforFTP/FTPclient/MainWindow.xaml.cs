@@ -42,7 +42,7 @@ namespace FTPclient
 
         private async void HandleServerDoubleClick(object sender, RoutedEventArgs e)
         {
-            await model.OpenServerFolderOrDownloadFile((sender as ListViewItem).Content.ToString());
+             await model.OpenServerFolderOrDownloadFile((sender as ListViewItem).Content.ToString());
         }
 
         private void HandleClientDoubleClick(object sender, RoutedEventArgs e)
@@ -57,17 +57,17 @@ namespace FTPclient
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
         {
-            await model.Connect();
+             await model.Connect();
         }
 
         private async void DownloadAll_Click(object sender, RoutedEventArgs e)
         {
-            await model.DownloadAllFilesInCurrentDirectory();
+             await model.DownloadAllFilesInCurrentDirectory();
         }
 
         private async void BackServer_Click(object sender, RoutedEventArgs e)
         {
-            await model.GoBackServer();
+             await model.GoBackServer();
         }
 
         private void BackClient_Click(object sender, RoutedEventArgs e)
@@ -78,6 +78,16 @@ namespace FTPclient
         private void ChooseFolder_Click(object sender, RoutedEventArgs e)
         {
             model.UpdateDownloadFolder();
+        }
+
+        private void addressTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            model.IsConnected = false;
+        }
+
+        private void portTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            model.IsConnected = false;
         }
     }
 }

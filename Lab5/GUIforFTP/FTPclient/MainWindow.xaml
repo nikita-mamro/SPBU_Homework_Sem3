@@ -76,10 +76,10 @@
                 <Label Grid.Row="0" Content="Connect to server" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
 
                 <Label Grid.Row="1" Content="Address" HorizontalAlignment="Left"  VerticalAlignment="Center" FontSize="20"/>
-                <TextBox Grid.Row="1" Name="addressTextBox" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Address}" Width="200" VerticalAlignment="Center" FontSize="30"/>
+                <TextBox Grid.Row="1" Name="addressTextBox" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Address}" Width="200" VerticalAlignment="Center" FontSize="30" TextChanged="addressTextBox_TextChanged"/>
 
                 <Label Grid.Row="2" Content="Port" HorizontalAlignment="Left"  VerticalAlignment="Center" FontSize="20"/>
-                <TextBox Grid.Row="2" Name="portTextBox" PreviewTextInput="PortTextBoxValidation" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Port}" Width="200" VerticalAlignment="Center" FontSize="30"/>
+                <TextBox Grid.Row="2" Name="portTextBox" PreviewTextInput="PortTextBoxValidation" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=Port}" Width="200" VerticalAlignment="Center" FontSize="30" TextChanged="portTextBox_TextChanged"/>
 
                 <Button Grid.Row="3" Name="connectButton" Content="Connect" HorizontalAlignment="Center" VerticalAlignment="Center" Width="80" Height="40" Click="Connect_Click"/>
             </Grid>

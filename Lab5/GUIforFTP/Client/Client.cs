@@ -41,44 +41,6 @@ namespace FTPClient
         }
 
         /// <summary>
-        /// Для демонстрации работы с запросом List
-        /// </summary>
-        public async Task Start()
-        {
-            Connect();
-            Console.WriteLine("Клиент подключён к серверу");
-
-            while (true)
-            {
-                var input = Console.ReadLine();
-
-                if (input == "stop")
-                {
-                    Stop();
-                    Console.WriteLine("Клиент отключён");
-                    break;
-                }
-
-                try
-                {
-                    var res = await List(input);
-
-                    foreach (var e in res)
-                    {
-                        Console.WriteLine(e);
-                    }
-                }
-                catch (Exception e) when (
-                    e is SocketException
-                    || e is IOException
-                    )
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
-        }
-
-        /// <summary>
         /// Запрос на получение списка файлов и папок по указанному пути на сервере
         /// </summary>
         /// <returns>Список значений (имя, папка - true / файл - false) </returns>

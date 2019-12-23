@@ -17,15 +17,17 @@ namespace ViewModel
         private string server;
 
         private Client client;
-        public bool IsConnected;
+        private bool isConnected = false;
+        public bool IsConnected
+        {
+            get
+                => isConnected;
+            set
+                => isConnected = value;
+        }
 
         public string RootServerDirectoryPath;
         public string RootClientDirectoryPath;
-
-        /// <summary>
-        /// Полный путь до текущей папки на сервере
-        /// </summary>
-        private string currentDirectoryOnServerPath;
 
         private string currentDirectoryOnClientPath;
 
@@ -52,7 +54,7 @@ namespace ViewModel
             }
         }
 
-        private ObservableCollection<string> currentPathsOnServer;
+        private ObservableCollection<(string, bool)> currentPathsOnServer;
         private ObservableCollection<string> currentPathsOnClient;
 
         public ObservableCollection<string> DisplayedListOnServer;
@@ -86,11 +88,10 @@ namespace ViewModel
 
         public ClientViewModel()
         {
-            this.server = "127.0.0.1";
-            this.port = 8888;
+            server = "127.0.0.1";
+            port = 8888;
             RootServerDirectoryPath = "..\\..\\..\\Server\\res";
             RootClientDirectoryPath = "..\\..\\..\\Client\\res\\Downloads\\";
-            currentDirectoryOnServerPath = RootServerDirectoryPath;
             сurrentDirectoryOnServer = "";
 
             currentDirectoryOnClientPath = RootClientDirectoryPath;
@@ -108,7 +109,7 @@ namespace ViewModel
 
         public async Task Connect()
         {
-            if (IsConnected)
+            if (isConnected)
             {
                 return;
             }
@@ -120,7 +121,7 @@ namespace ViewModel
             try
             {
                 client.Connect();
-                IsConnected = true;
+                isConnected = true;
                 await InitializeCurrentPathsOnServer();
             }
             catch (Exception e)
@@ -147,7 +148,7 @@ namespace ViewModel
 
         private async Task InitializeCurrentPathsOnServer()
         {
-            currentPathsOnServer = new ObservableCollection<string>();
+            currentPathsOnServer = new ObservableCollection<(string, bool)>();
 
             currentPathsOnServer.CollectionChanged += CurrentPathsOnServerChanged;
             
@@ -177,17 +178,17 @@ namespace ViewModel
         {
             if (e.OldItems != null)
             {
-                foreach (var item in e.OldItems)
+                foreach ((string, bool) pair in e.OldItems)
                 {
-                    DisplayedListOnServer.Remove(item.ToString());
+                    DisplayedListOnServer.Remove(pair.Item1);
                 }
             }
 
             if (e.NewItems != null)
             {
-                foreach (var item in e.NewItems)
+                foreach ((string, bool) pair in e.NewItems)
                 {
-                    DisplayedListOnServer.Add(item.ToString());
+                    DisplayedListOnServer.Add(pair.Item1);
                 }
             }
         }
@@ -209,34 +210,30 @@ namespace ViewModel
             }
         }
 
+        private bool IsFile(string folderName)
+        {
+            foreach (var path in currentPathsOnServer)
+            {
+                if (path.Item1 == folderName)
+                {
+                    return !path.Item2;
+                }
+            }
+
+            return false;
+        }
+
         public async Task OpenServerFolderOrDownloadFile(string folderName)
         {
-            var nextDirectory = Path.Combine(currentDirectoryOnServerPath, folderName);
+            if (IsFile(folderName))
+            {
+                await DownloadFile(folderName);
+                return;
+            }
 
-            if (Directory.Exists(nextDirectory))
-            {
-                try
-                {
-                    await TryUpdateCurrentPathsOnServer(Path.Combine(сurrentDirectoryOnServer, folderName));
-                    currentDirectoryOnServerPath = nextDirectory;
-                    сurrentDirectoryOnServer = Path.Combine(сurrentDirectoryOnServer, folderName);
-                }
-                catch (Exception e)
-                {
-                    ErrorHandler.Invoke(this, e.Message);
-                }
-            }
-            else
-            {
-                try
-                {
-                    await DownloadFile(folderName);
-                }
-                catch (Exception e)
-                {
-                    ErrorHandler.Invoke(this, e.Message);
-                }
-            }
+            var nextDirectory = Path.Combine(сurrentDirectoryOnServer, folderName);
+
+            await TryUpdateCurrentPathsOnServer(nextDirectory);
         }
 
         private void TryUpdateCurrentPathsOnClient(string folderPath)
@@ -281,11 +278,19 @@ namespace ViewModel
 
                     name = name.Substring(name.LastIndexOf('\\') + 1);
 
-                    currentPathsOnServer.Add(name);
+                    currentPathsOnServer.Add((name, path.Item2));
                 }
+
+                сurrentDirectoryOnServer = listRequest;
             }
             catch (Exception e)
             {
+                if (e.Message == "-1")
+                {
+                    ErrorHandler.Invoke(this, "Directory not found exception occured");
+                    return;
+                }
+
                 ErrorHandler.Invoke(this, e.Message);
             }
         }
@@ -345,8 +350,6 @@ namespace ViewModel
                 }
 
                 await TryUpdateCurrentPathsOnServer(toOpen);
-                сurrentDirectoryOnServer = toOpen;
-                currentDirectoryOnServerPath = Directory.GetParent(currentDirectoryOnServerPath).ToString();
             }
             catch (Exception e)
             {
@@ -372,13 +375,36 @@ namespace ViewModel
 
         public async Task DownloadFile(string fileName)
         {
-            var pathToFile = Path.Combine(сurrentDirectoryOnServer, fileName);
+            try
+            {
+                var pathToFile = Path.Combine(сurrentDirectoryOnServer, fileName);
 
-            await client.Get(pathToFile, downloadPath);
+                await client.Get(pathToFile, downloadPath);
+            }
+            catch (Exception e)
+            {
+                ErrorHandler.Invoke(this, e.Message);
+            }
         }
 
         public async Task DownloadAllFilesInCurrentDirectory()
         {
+            try
+            {
+                foreach (var path in currentPathsOnServer)
+                {
+                    if (!path.Item2)
+                    {
+                        var pathToFile = Path.Combine(сurrentDirectoryOnServer, path.Item1);
+
+                        await client.Get(pathToFile, downloadPath);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                ErrorHandler.Invoke(this, e.Message);
+            }
         }
     }
 }
