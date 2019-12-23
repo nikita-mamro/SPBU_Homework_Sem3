@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using ViewModel;
 
 namespace FTPclient
@@ -15,22 +17,42 @@ namespace FTPclient
         {
             model = new ClientViewModel();
             model.ErrorHandler += ShowMessage;
+            DataContext = model;
 
             InitializeComponent();
 
-            AddressPortGrid.DataContext = model;
-
-            filesAndFoldersListView.ItemsSource = model.DisplayedList;
+            filesAndFoldersServerListView.ItemsSource = model.DisplayedListOnServer;
+            clientListView.ItemsSource = model.DisplayedListOnClient;
         }
 
-        private async void HandleDoubleClick(object sender, RoutedEventArgs e)
+        private void Window_ContentRendered(object sender, System.EventArgs e)
         {
-            await model.OpenFolderOrDownloadFile((sender as ListViewItem).Content.ToString());
+            MessageBox.Show(Application.Current.MainWindow,
+                "To open folder: DoubleClick on folder\n" +
+                "To connect to server and see its explorer: Input address and port and click on Connect button\n" +
+                "To set download fodler: Click Choose button when in the folder you want to set as download folder\n" +
+                "To download file from server: Choose download folder and double click on file\n", "Hint");
+        }
+
+        private void PortTextBoxValidation(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private async void HandleServerDoubleClick(object sender, RoutedEventArgs e)
+        {
+            await model.OpenServerFolderOrDownloadFile((sender as ListViewItem).Content.ToString());
+        }
+
+        private void HandleClientDoubleClick(object sender, RoutedEventArgs e)
+        {
+            model.OpenClientFolder((sender as ListViewItem).Content.ToString());
         }
 
         private void ShowMessage(object sender, string errorMessage)
         {
-            MessageBox.Show(errorMessage);
+            MessageBox.Show(errorMessage, "Error occured");
         }
 
         private async void Connect_Click(object sender, RoutedEventArgs e)
@@ -38,14 +60,24 @@ namespace FTPclient
             await model.Connect();
         }
 
-        private async void Back_Click(object sender, RoutedEventArgs e)
-        {
-            await model.GoBack();
-        }
-
         private async void DownloadAll_Click(object sender, RoutedEventArgs e)
         {
             await model.DownloadAllFilesInCurrentDirectory();
+        }
+
+        private async void BackServer_Click(object sender, RoutedEventArgs e)
+        {
+            await model.GoBackServer();
+        }
+
+        private void BackClient_Click(object sender, RoutedEventArgs e)
+        {
+            model.GoBackClient();
+        }
+
+        private void ChooseFolder_Click(object sender, RoutedEventArgs e)
+        {
+            model.UpdateDownloadFolder();
         }
     }
 }
