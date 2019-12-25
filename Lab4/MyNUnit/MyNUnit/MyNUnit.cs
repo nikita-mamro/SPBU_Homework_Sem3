@@ -11,6 +11,9 @@ using System.Diagnostics;
 
 namespace MyNUnit
 {
+    /// <summary>
+    /// Класс для запусков тестов и получения результатов тестирования
+    /// </summary>
     public static class MyNUnit
     {
         /// <summary>
@@ -43,6 +46,9 @@ namespace MyNUnit
             return GetDictionaryOfReports();
         }
 
+        /// <summary>
+        /// Принимает путь и запускает тесты
+        /// </summary>
         private static void ProceedPathAndExecuteTests(string path)
         {
             var classes = GetClasses(path);
@@ -51,8 +57,6 @@ namespace MyNUnit
             {
                 QueueClassTests(someClass);
             });
-
-            var lol = methodsToTest;
 
             ExecuteAllTests();
         }
@@ -63,8 +67,6 @@ namespace MyNUnit
         private static Dictionary<Type, List<TestInfo>> GetDictionaryOfReports()
         {
             var res = new Dictionary<Type, List<TestInfo>>();
-
-            var lol = testResults;
 
             foreach (var type in testResults.Keys)
             {
@@ -153,7 +155,7 @@ namespace MyNUnit
             if (attribute.IsIgnored)
             {
                 isPassed = true;
-                testResults[type].Add(new TestInfo(method.Name, true, attribute.IgnoranceMessage));
+                testResults[type].Add(new TestInfo(method.Name, true, attribute.IgnoreMessage));
                 return;
             }
 

@@ -15,18 +15,18 @@ namespace MyNUnit.Attributes
         /// <summary>
         /// Сообщение, объясняющее, почему метод игнорируется при тестировании
         /// </summary>
-        public string IgnoranceMessage { get; private set; }
+        public string IgnoreMessage { get; private set; }
 
         /// <summary>
         /// Хранит информацию о том, игнорируется ли метод при тестировании
         /// </summary>
         public bool IsIgnored
-            => IgnoranceMessage != "";
+            => IgnoreMessage != "";
 
         public TestAttribute(string ignore = "", Type expected = null)
         {
             ExpectedException = expected;
-            IgnoranceMessage = ignore;
+            IgnoreMessage = ignore;
         }
     }
 }
