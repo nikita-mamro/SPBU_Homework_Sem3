@@ -83,13 +83,14 @@ namespace FTPServer
                 await writer.WriteLineAsync("-1");
             }
 
-            var size = new FileInfo(path).Length;
-            await writer.WriteLineAsync($"{size}");
+            string res;
 
-            using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+            using (var reader = new StreamReader(new FileStream(path, FileMode.Open, FileAccess.ReadWrite)))
             {
-                await fileStream.CopyToAsync(writer.BaseStream);
+                res = await reader.ReadToEndAsync();
             }
+
+            await writer.WriteLineAsync($"{res}");
         }
     }
 }

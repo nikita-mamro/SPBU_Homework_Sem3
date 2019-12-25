@@ -52,8 +52,6 @@ namespace FTPServer
                 {
                     var client = await listener.AcceptTcpClientAsync();
 
-                    Console.WriteLine("new client");
-
                     HandleClient(client);
                 }
             }
@@ -61,35 +59,6 @@ namespace FTPServer
             {
                 Console.WriteLine(e.Message);
                 Stop();
-            }
-        }
-
-        /// <summary>
-        /// Метод, ппроверяющий, подключён ли данный клиент к серверу
-        /// </summary>
-        private bool IsConnected(TcpClient client)
-        {
-            try
-            {
-                if (client != null && client.Client != null && client.Client.Connected)
-                {
-                    if (client.Client.Poll(0, SelectMode.SelectRead))
-                    {
-                        var buffer = new byte[1];
-                        if (client.Client.Receive(buffer, SocketFlags.Peek) == 0)
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-
-                return false;
-            }
-            catch
-            {
-                return false;
             }
         }
 
@@ -102,11 +71,6 @@ namespace FTPServer
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    if (!IsConnected(client))
-                    {
-                        break;
-                    }
-
                     var reader = new StreamReader(client.GetStream());
                     var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
 

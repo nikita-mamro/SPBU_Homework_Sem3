@@ -10,15 +10,16 @@ using FTPServer;
 
 namespace ViewModel.Tests
 {
+    /// <summary>
+    /// Тесты бэкенда
+    /// </summary>
     [TestClass]
     public class ClientViewModelTests
     {
         private Server server;
         private string address;
         private int port;
-        private string rootPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
-        //private string folderPath = "res\\Downloads\\";
-        //private string pathToDownloaded;
+        private string folderPath = "..\\..\\res\\Downloads\\";
 
         private ClientViewModel model;
 
@@ -34,35 +35,52 @@ namespace ViewModel.Tests
             port = 9999;
             server = new Server(port);
 
-            model = new ClientViewModel();
+            model = new ClientViewModel(folderPath);
+            model.Port = "9999";
+            model.Address = "127.0.0.1";
             model.ErrorHandler += ErrorCatcher;
         }
 
         [TestMethod]
         public void ConnectTest()
         {
-            //TODO: initial paths test
             Task.Run(async () =>
             {
-                await server.Start();
                 await model.Connect();
-            });
 
-            Assert.Fail();
+                Assert.Fail();
+            });
         }
 
-        //[TestMethod]
-        //public void OpenClientFolderTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
-        //[TestMethod]
-        //public void OpenServerFolderOrDownloadFileTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
+        [TestMethod]
+        public void OpenClientFolderTest()
+        {
+            server.Start();
+            model.Connect();
+
+            model.OpenClientFolder("Folllder");
+            model.OpenClientFolder("Folder");
+
+            Assert.IsTrue(model.DisplayedListOnClient.Contains("FolderInFolder"));
+
+            model.GoBackClient();
+
+            Assert.IsTrue(model.DisplayedListOnClient.Contains("Folder"));
+        }
+        
+        [TestMethod]
+        public void OpenServerFolderTest()
+        {
+            server.Start();
+            model.Connect();
+
+            model.OpenServerFolderOrDownloadFile("TestData").Wait();
+
+            var res = model.DisplayedListOnServer;
+
+            Assert.IsTrue(model.DisplayedListOnServer.Contains(""));
+        }
+        
         //[TestMethod]
         //public void GoBackClientTest()
         //{

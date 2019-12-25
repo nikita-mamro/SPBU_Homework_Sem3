@@ -46,12 +46,14 @@ namespace FTPClient
         /// <returns>Список значений (имя, папка - true / файл - false) </returns>
         public async Task<List<(string, bool)>> List(string path)
         {
+            string response;
+
             var writer = new StreamWriter(client.GetStream()) { AutoFlush = true };
             var reader = new StreamReader(client.GetStream());
-
+            
             await writer.WriteLineAsync("1" + path);
-
-            var response = await reader.ReadLineAsync();
+            
+            response = await reader.ReadLineAsync();
 
             return ResponseHandler.HandleListResponse(response);
         }
@@ -73,19 +75,14 @@ namespace FTPClient
 
             var response = await reader.ReadLineAsync();
 
-            if (!long.TryParse(response, out long fileSize))
-            {
-                throw new Exception(response);
-            }
-
-            if (fileSize == -1)
+            if (response == "-1")
             {
                 throw new FileNotFoundException();
             }
 
-            using (var fileStream = new FileStream(pathTo + fileName, FileMode.CreateNew))
+            using (var fileWriter = new StreamWriter(new FileStream(pathTo + fileName, FileMode.CreateNew)))
             {
-                await reader.BaseStream.CopyToAsync(fileStream);
+                await fileWriter.WriteAsync(response);
             }
         }
 

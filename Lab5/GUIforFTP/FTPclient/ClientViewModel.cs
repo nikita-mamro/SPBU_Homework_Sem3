@@ -11,35 +11,59 @@ using Microsoft.Win32;
 
 namespace ViewModel
 {
+    /// <summary>
+    /// Класс, реализующий модель для GUI
+    /// </summary>
     public class ClientViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Порт для подключения
+        /// </summary>
         private int port;
+
+        /// <summary>
+        /// Адрес для подключения
+        /// </summary>
         private string server;
 
+        /// <summary>
+        /// Клиент
+        /// </summary>
         private Client client;
-        private bool isConnected = false;
-        public bool IsConnected
-        {
-            get
-                => isConnected;
-            set
-                => isConnected = value;
-        }
 
-        public string RootServerDirectoryPath;
+        /// <summary>
+        /// Индикатор состояния подключения
+        /// </summary>
+        public bool IsConnected = false;
+
+        /// <summary>
+        /// Корневая папка клиента
+        /// </summary>
         public string RootClientDirectoryPath;
 
+        /// <summary>
+        /// Путь до текущей папки в клиенте
+        /// </summary>
         private string currentDirectoryOnClientPath;
 
         /// <summary>
-        /// Путь до текушей папки на сервере, считая от корневой
+        /// Путь до текушей папки на сервере
         /// </summary>
         private string сurrentDirectoryOnServer;
 
+        /// <summary>
+        /// Текущая папка в клиенте
+        /// </summary>
         private string currentDirectoryOnClient;
 
+        /// <summary>
+        /// Полный путь для загрузки
+        /// </summary>
         private string downloadPath;
 
+        /// <summary>
+        /// Папка для загрузок
+        /// </summary>
         public string DownloadFolder
         {
             get
@@ -54,16 +78,49 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Полные пути до текущих директорий на сервере
+        /// </summary>
         private ObservableCollection<(string, bool)> currentPathsOnServer;
+
+        /// <summary>
+        /// Полные пути до текущих директорий в клиенте
+        /// </summary>
         private ObservableCollection<string> currentPathsOnClient;
 
+        /// <summary>
+        /// Элементы обозревателя директории на сервере
+        /// </summary>
         public ObservableCollection<string> DisplayedListOnServer;
+
+        /// <summary>
+        /// Элементы обозревателя папок в клиенте
+        /// </summary>
         public ObservableCollection<string> DisplayedListOnClient;
 
+        /// <summary>
+        /// Список текущих загрузок
+        /// </summary>
+        public ObservableCollection<string> DownloadsInProcessList;
+
+        /// <summary>
+        /// Список завершенных загрузок
+        /// </summary>
+        public ObservableCollection<string> DownloadsFinishedList;
+
+        /// <summary>
+        /// Обработчик ошибок
+        /// </summary>
         public EventHandler<string> ErrorHandler;
 
+        /// <summary>
+        /// Обработчик изменения текущей папки для загрузки
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Порт для подключения
+        /// </summary>
         public string Port
         {
             get
@@ -78,6 +135,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Адрес для подключения
+        /// </summary>
         public string Address
         {
             get
@@ -86,12 +146,14 @@ namespace ViewModel
                 => server = value;
         }
 
-        public ClientViewModel()
+        /// <summary>
+        /// Инициализация модели
+        /// </summary>
+        public ClientViewModel(string rootClientDirectory)
         {
             server = "127.0.0.1";
             port = 8888;
-            RootServerDirectoryPath = "..\\..\\..\\Server\\res";
-            RootClientDirectoryPath = "..\\..\\..\\Client\\res\\Downloads\\";
+            RootClientDirectoryPath = rootClientDirectory;
             сurrentDirectoryOnServer = "";
 
             currentDirectoryOnClientPath = RootClientDirectoryPath;
@@ -101,15 +163,25 @@ namespace ViewModel
             DisplayedListOnServer = new ObservableCollection<string>();
             DisplayedListOnClient = new ObservableCollection<string>();
 
+            DownloadsInProcessList = new ObservableCollection<string>();
+            DownloadsFinishedList = new ObservableCollection<string>();
+
             InitializeCurrentPathsOnClient();
         }
 
+        /// <summary>
+        /// Уведомляет элемент интерфейса, отображающий текущую папку для загрузки, о её изменении
+        /// </summary>
         protected virtual void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        /// <summary>
+        /// Подключение клиента к серверу
+        /// </summary>
+        /// <returns></returns>
         public async Task Connect()
         {
-            if (isConnected)
+            if (IsConnected)
             {
                 return;
             }
@@ -121,8 +193,8 @@ namespace ViewModel
             try
             {
                 client.Connect();
-                isConnected = true;
                 await InitializeCurrentPathsOnServer();
+                IsConnected = true;
             }
             catch (Exception e)
             {
@@ -130,6 +202,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Инициализация текущего состояния путей к папкам в клиенте
+        /// </summary>
         private void InitializeCurrentPathsOnClient()
         {
             currentPathsOnClient = new ObservableCollection<string>();
@@ -146,6 +221,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Инициализация текущего состояние путей к файлам и папкам на сервере
+        /// </summary>
         private async Task InitializeCurrentPathsOnServer()
         {
             currentPathsOnServer = new ObservableCollection<(string, bool)>();
@@ -155,6 +233,9 @@ namespace ViewModel
             await TryUpdateCurrentPathsOnServer("");
         }
 
+        /// <summary>
+        /// Обработчик изменения текущего состояния путей к папкам в клиенте
+        /// </summary>
         private void CurrentPathsOnClientChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
@@ -174,6 +255,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Обработчик изменения текущего состояния путей к папка на сервере
+        /// </summary>
         private void CurrentPathsOnServerChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
@@ -193,6 +277,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Открытие папки в обозревателе клиента
+        /// </summary>
         public void OpenClientFolder(string folderName)
         {
             var nextDirectoryPath = Path.Combine(currentDirectoryOnClientPath, folderName);
@@ -210,6 +297,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Проверяет, является ли файлом элемент с данным именем
+        /// </summary>
         private bool IsFile(string folderName)
         {
             foreach (var path in currentPathsOnServer)
@@ -223,6 +313,9 @@ namespace ViewModel
             return false;
         }
 
+        /// <summary>
+        /// Открывает папку или скачивает файл по нажатии на элемент ListView в GUI
+        /// </summary>
         public async Task OpenServerFolderOrDownloadFile(string folderName)
         {
             if (IsFile(folderName))
@@ -236,6 +329,10 @@ namespace ViewModel
             await TryUpdateCurrentPathsOnServer(nextDirectory);
         }
 
+        /// <summary>
+        /// Обновление путей в клиенте
+        /// </summary>
+        /// <param name="folderPath">Открытая папка</param>
         private void TryUpdateCurrentPathsOnClient(string folderPath)
         {
             try
@@ -261,6 +358,10 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Обновление текущих путей на сервере
+        /// </summary>
+        /// <param name="listRequest">Открытая папка</param>
         private async Task TryUpdateCurrentPathsOnServer(string listRequest)
         {
             try
@@ -295,6 +396,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Возвращение назад в клиенте
+        /// </summary>
         public void GoBackClient()
         {
             if (currentDirectoryOnClient == "")
@@ -327,6 +431,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Возвращение назад на сервере
+        /// </summary>
         public async Task GoBackServer()
         {
             if (сurrentDirectoryOnServer == "")
@@ -363,6 +470,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Обновляет папку для загрузки
+        /// </summary>
         public void UpdateDownloadFolder()
         {
             if (downloadPath == currentDirectoryOnClientPath)
@@ -373,13 +483,21 @@ namespace ViewModel
             DownloadFolder = currentDirectoryOnClientPath + "\\";
         }
 
+        /// <summary>
+        /// Загружает файл с данным именем
+        /// </summary>
         public async Task DownloadFile(string fileName)
         {
             try
             {
                 var pathToFile = Path.Combine(сurrentDirectoryOnServer, fileName);
 
+                DownloadsInProcessList.Add(fileName);
+
                 await client.Get(pathToFile, downloadPath);
+
+                DownloadsInProcessList.Remove(fileName);
+                DownloadsFinishedList.Add(fileName);
             }
             catch (Exception e)
             {
@@ -387,6 +505,9 @@ namespace ViewModel
             }
         }
 
+        /// <summary>
+        /// Загружает все файлы из текущей папки
+        /// </summary>
         public async Task DownloadAllFilesInCurrentDirectory()
         {
             try
@@ -395,9 +516,7 @@ namespace ViewModel
                 {
                     if (!path.Item2)
                     {
-                        var pathToFile = Path.Combine(сurrentDirectoryOnServer, path.Item1);
-
-                        await client.Get(pathToFile, downloadPath);
+                        await DownloadFile(path.Item1);
                     }
                 }
             }
