@@ -19,15 +19,12 @@ namespace FTPclient
         public MainWindow()
         {
             model = new ClientViewModel("..\\..\\..\\Client\\res\\Downloads\\");
-            model.ErrorHandler += ShowMessage;
+
+            model.ThrowError += (sender, message) => ShowMessage(message);
+
             DataContext = model;
 
             InitializeComponent();
-
-            filesAndFoldersServerListView.ItemsSource = model.DisplayedListOnServer;
-            clientListView.ItemsSource = model.DisplayedListOnClient;
-            filesToDownloadListView.ItemsSource = model.DownloadsInProcessList;
-            downloadedListView.ItemsSource = model.DownloadsFinishedList;
         }
 
         /// <summary>
@@ -70,7 +67,7 @@ namespace FTPclient
         /// <summary>
         /// Показывает сообщение об ошибке
         /// </summary>
-        private void ShowMessage(object sender, string errorMessage)
+        private void ShowMessage(string errorMessage)
         {
             MessageBox.Show(errorMessage, "Error occured");
         }

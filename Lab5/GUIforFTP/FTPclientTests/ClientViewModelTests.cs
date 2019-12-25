@@ -23,11 +23,13 @@ namespace ViewModel.Tests
 
         private ClientViewModel model;
 
+        private bool passed = false;
+
         private void ErrorCatcher(object sender, string errorMessage)
         {
-            Assert.IsTrue(true);
+            passed = true;
         }
-
+        
         [TestInitialize]
         public void Initialize()
         {
@@ -37,13 +39,15 @@ namespace ViewModel.Tests
 
             model = new ClientViewModel(folderPath);
             model.Port = "9999";
-            model.Address = "127.0.0.1";
-            model.ErrorHandler += ErrorCatcher;
+            model.Address = address;
+            model.ThrowError += ErrorCatcher;
         }
 
         [TestMethod]
         public void ConnectTest()
         {
+            model.IsConnected = false;
+
             Task.Run(async () =>
             {
                 await model.Connect();
@@ -55,6 +59,8 @@ namespace ViewModel.Tests
         [TestMethod]
         public void OpenClientFolderTest()
         {
+            model.IsConnected = false;
+
             server.Start();
             model.Connect();
 
@@ -62,53 +68,47 @@ namespace ViewModel.Tests
             model.OpenClientFolder("Folder");
 
             Assert.IsTrue(model.DisplayedListOnClient.Contains("FolderInFolder"));
+        }
+
+        [TestMethod]
+        public void GoBackFromRootClientExceptionTest()
+        {
+            model.IsConnected = false;
+
+            server.Start();
+            model.Connect();
+
+            model.GoBackClient();
+
+            Assert.IsTrue(passed);
+        }
+
+        [TestMethod]
+        public void GoBackFromRootServerExceptionTest()
+        {
+            model.IsConnected = false;
+
+            server.Start();
+            model.Connect();
+
+            model.GoBackServer();
+
+            Assert.IsTrue(passed);
+        }
+
+        [TestMethod]
+        public void GoBackClientTest()
+        {
+            model.IsConnected = false;
+
+            server.Start();
+            model.Connect();
+
+            model.OpenClientFolder("Folder");
 
             model.GoBackClient();
 
             Assert.IsTrue(model.DisplayedListOnClient.Contains("Folder"));
         }
-        
-        [TestMethod]
-        public void OpenServerFolderTest()
-        {
-            server.Start();
-            model.Connect();
-
-            model.OpenServerFolderOrDownloadFile("TestData").Wait();
-
-            var res = model.DisplayedListOnServer;
-
-            Assert.IsTrue(model.DisplayedListOnServer.Contains(""));
-        }
-        
-        //[TestMethod]
-        //public void GoBackClientTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
-        //[TestMethod]
-        //public void GoBackServerTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
-        //[TestMethod]
-        //public void UpdateDownloadFolderTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
-        //[TestMethod]
-        //public void DownloadFileTest()
-        //{
-        //    Assert.Fail();
-        //}
-        //
-        //[TestMethod]
-        //public void DownloadAllFilesInCurrentDirectoryTest()
-        //{
-        //    Assert.Fail();
-        //}
     }
 }

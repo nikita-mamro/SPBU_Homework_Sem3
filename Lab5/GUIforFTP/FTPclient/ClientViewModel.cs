@@ -2,12 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FTPClient;
-using Microsoft.Win32;
 
 namespace ViewModel
 {
@@ -91,27 +89,30 @@ namespace ViewModel
         /// <summary>
         /// Элементы обозревателя директории на сервере
         /// </summary>
-        public ObservableCollection<string> DisplayedListOnServer;
+        public ObservableCollection<string> DisplayedListOnServer { get; private set; }
 
         /// <summary>
         /// Элементы обозревателя папок в клиенте
         /// </summary>
-        public ObservableCollection<string> DisplayedListOnClient;
+        public ObservableCollection<string> DisplayedListOnClient { get; private set; }
 
         /// <summary>
         /// Список текущих загрузок
         /// </summary>
-        public ObservableCollection<string> DownloadsInProcessList;
+        public ObservableCollection<string> DownloadsInProgressList { get; private set; }
 
         /// <summary>
         /// Список завершенных загрузок
         /// </summary>
-        public ObservableCollection<string> DownloadsFinishedList;
+        public ObservableCollection<string> DownloadsFinishedList { get; private set; }
+
 
         /// <summary>
-        /// Обработчик ошибок
+        /// Обработка ошибок
         /// </summary>
-        public EventHandler<string> ErrorHandler;
+        public delegate void ShowErrorMessage(object sender, string message);
+
+        public event ShowErrorMessage ThrowError = (_, __) => { };
 
         /// <summary>
         /// Обработчик изменения текущей папки для загрузки
@@ -162,8 +163,8 @@ namespace ViewModel
 
             DisplayedListOnServer = new ObservableCollection<string>();
             DisplayedListOnClient = new ObservableCollection<string>();
-
-            DownloadsInProcessList = new ObservableCollection<string>();
+            
+            DownloadsInProgressList = new ObservableCollection<string>();
             DownloadsFinishedList = new ObservableCollection<string>();
 
             InitializeCurrentPathsOnClient();
@@ -198,7 +199,7 @@ namespace ViewModel
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -217,7 +218,7 @@ namespace ViewModel
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -242,7 +243,7 @@ namespace ViewModel
             {
                 foreach (var item in e.OldItems)
                 {
-                    DisplayedListOnClient.Remove(item.ToString());
+                   DisplayedListOnClient.Remove(item.ToString());
                 }
             }
 
@@ -293,7 +294,7 @@ namespace ViewModel
             }
             else
             {
-                ErrorHandler.Invoke(this, $"Folder {folderName} does not exist on client");
+                ThrowError(this, "Directory not found");
             }
         }
 
@@ -354,7 +355,7 @@ namespace ViewModel
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -388,11 +389,11 @@ namespace ViewModel
             {
                 if (e.Message == "-1")
                 {
-                    ErrorHandler.Invoke(this, "Directory not found exception occured");
+                    ThrowError(this, "Directory not found exception occured");
                     return;
                 }
 
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -403,7 +404,7 @@ namespace ViewModel
         {
             if (currentDirectoryOnClient == "")
             {
-                ErrorHandler.Invoke(this, "Can't go back from the root directory");
+                ThrowError(this, "Can't go back from the root directory");
                 return;
             }
 
@@ -427,7 +428,7 @@ namespace ViewModel
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -438,7 +439,7 @@ namespace ViewModel
         {
             if (сurrentDirectoryOnServer == "")
             {
-                ErrorHandler.Invoke(this, "Can't go back from the root directory");
+                ThrowError(this, "Can't go back from the root directory");
                 return;
             }
 
@@ -462,11 +463,11 @@ namespace ViewModel
             {
                 if (e.Message == "-1")
                 {
-                    ErrorHandler.Invoke(this, "Directory not found exception occured");
+                    ThrowError(this, "Directory not found exception occured");
                     return;
                 }
 
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -492,16 +493,16 @@ namespace ViewModel
             {
                 var pathToFile = Path.Combine(сurrentDirectoryOnServer, fileName);
 
-                DownloadsInProcessList.Add(fileName);
+                DownloadsInProgressList.Add(fileName);
 
                 await client.Get(pathToFile, downloadPath);
 
-                DownloadsInProcessList.Remove(fileName);
+                DownloadsInProgressList.Remove(fileName);
                 DownloadsFinishedList.Add(fileName);
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
 
@@ -522,7 +523,7 @@ namespace ViewModel
             }
             catch (Exception e)
             {
-                ErrorHandler.Invoke(this, e.Message);
+                ThrowError(this, e.Message);
             }
         }
     }
