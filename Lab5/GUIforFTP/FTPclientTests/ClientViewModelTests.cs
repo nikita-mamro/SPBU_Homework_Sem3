@@ -57,20 +57,6 @@ namespace ViewModel.Tests
         }
 
         [TestMethod]
-        public void OpenClientFolderTest()
-        {
-            model.IsConnected = false;
-
-            server.Start();
-            model.Connect();
-
-            model.OpenClientFolder("Folllder");
-            model.OpenClientFolder("Folder");
-
-            Assert.IsTrue(model.DisplayedListOnClient.Contains("FolderInFolder"));
-        }
-
-        [TestMethod]
         public void GoBackFromRootClientExceptionTest()
         {
             model.IsConnected = false;
@@ -94,21 +80,6 @@ namespace ViewModel.Tests
             model.GoBackServer();
 
             Assert.IsTrue(passed);
-        }
-
-        [TestMethod]
-        public void GoBackClientTest()
-        {
-            model.IsConnected = false;
-
-            server.Start();
-            model.Connect();
-
-            model.OpenClientFolder("Folder");
-
-            model.GoBackClient();
-
-            Assert.IsTrue(model.DisplayedListOnClient.Contains("Folder"));
         }
     }
 }
