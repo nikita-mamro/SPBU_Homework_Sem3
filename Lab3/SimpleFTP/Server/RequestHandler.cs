@@ -29,6 +29,8 @@ namespace FTPServer
                 {
                     await HandleGetRequest(path, writer);
                 }
+
+                return;
             }
 
             var error = "Wrong format error";
